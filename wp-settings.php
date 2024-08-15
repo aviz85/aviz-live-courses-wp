@@ -546,7 +546,7 @@ if ( WP_CACHE && function_exists( 'wp_cache_postload' ) ) {
 }
 
 /**
- * Fires once activated plugins have loaded.
+ * Fires after activated plugins have loaded.
  *
  * Pluggable functions are also available at this point in the loading order.
  *

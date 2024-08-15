@@ -1,0 +1,22 @@
+/* RTL Styles */
+body {
+    direction: rtl;
+    unicode-bidi: embed;
+}
+
+.main-navigation li {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.content-area {
+    float: right;
+    padding-right: 0;
+    padding-left: 30px;
+}
+
+.widget-area {
+    float: left;
+}
+
+/* Add more RTL specific styles as needed */

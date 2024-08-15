@@ -1,0 +1,29 @@
+# קבצי מערכת
+.DS_Store
+Thumbs.db
+
+# תיקיות סביבה וירטואלית
+venv/
+env/
+.env
+
+# קבצי Python מקומפלים
+*.pyc
+__pycache__/
+
+# קבצי לוג
+*.log
+
+# תיקיות ספציפיות לסביבת פיתוח
+.idea/
+.vscode/
+
+# תיקיות בניה
+build/
+dist/
+
+# קבצי תלויות
+node_modules/
+
+# קבצי תצורה מקומיים
+config.local.js

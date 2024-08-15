@@ -204,3 +204,10 @@ if ( ! function_exists( 'twentytwentyfour_pattern_categories' ) ) :
 endif;
 
 add_action( 'init', 'twentytwentyfour_pattern_categories' );
+
+add_filter('the_content', function($content) {
+    if (is_page() && has_shortcode($content, 'aviz_home_page')) {
+        return do_shortcode($content);
+    }
+    return $content;
+});

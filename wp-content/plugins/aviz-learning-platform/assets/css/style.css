@@ -1,0 +1,152 @@
+.aviz-dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.aviz-course-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.aviz-course-list li {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.aviz-course-list h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.aviz-progress-bar {
+    background-color: #e0e0e0;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.aviz-progress {
+    background-color: #4CAF50;
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.aviz-progress-text {
+    font-size: 0.9em;
+    color: #666;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.aviz-course-button {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.aviz-course-button:hover {
+    background-color: #45a049;
+}
+
+.aviz-course-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.aviz-content-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.aviz-content-list li {
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.aviz-content-list a {
+    display: block;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.aviz-content-list a:hover {
+    background-color: #e0e0e0;
+}
+
+.aviz-content-viewed a {
+    background-color: #e8f5e9;
+}
+
+.aviz-viewed-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4CAF50;
+}
+
+/* Added styles for the home page */
+.aviz-home-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+}
+
+.aviz-home-page h1 {
+    font-size: 2.5em;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.aviz-intro {
+    font-size: 1.2em;
+    color: #666;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.aviz-course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.aviz-course-card {
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.aviz-course-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.aviz-course-card .aviz-progress-bar {
+    margin-bottom: 15px;
+}
+
+.aviz-course-card .aviz-course-button {
+    display: block;
+    text-align: center;
+}

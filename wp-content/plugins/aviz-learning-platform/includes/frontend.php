@@ -166,22 +166,23 @@ function aviz_home_page() {
 }
 add_shortcode('aviz_home_page', 'aviz_home_page');
 
-// פונקציה זו הוסרה זמנית כדי לבדוק אם היא גורמת לבעיה
-// function aviz_login_redirect($redirect_to, $request, $user) {
-//     if (isset($user->roles) && is_array($user->roles)) {
-//         // בדיקה אם המשתמש הוא מנהל מערכת
-//         if (in_array('administrator', $user->roles)) {
-//             // מנהלי מערכת ימשיכו להגיע ללוח הבקרה
-//             return $redirect_to;
-//         } else {
-//             // משתמשים רגילים יופנו לדף הבית של הפלטפורמה
-//             return home_url('/');
-//         }
-//     } else {
-//         return $redirect_to;
-//     }
-// }
-// add_filter('login_redirect', 'aviz_login_redirect', 10, 3);
+function aviz_login_redirect($redirect_to, $request, $user) {
+    if (isset($user->roles) && is_array($user->roles)) {
+        if (in_array('administrator', $user->roles)) {
+            return admin_url();
+        } else {
+            return home_url('/'); // מפנה לדף הבית, שבו נמצא ה-shortcode של דף הבית שלנו
+        }
+    }
+    return $redirect_to;
+}
+add_filter('login_redirect', 'aviz_login_redirect', 10, 3);
+
+// הוספת פונקציית דיבאג כדי לוודא שהפונקציה נקראת
+function aviz_debug_login_redirect($user_login, $user) {
+    error_log('User ' . $user_login . ' logged in. Redirect function called.');
+}
+add_action('wp_login', 'aviz_debug_login_redirect', 10, 2);
 
 add_action('wp_footer', function() {
     if (current_user_can('manage_options')) {

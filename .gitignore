@@ -27,3 +27,5 @@ node_modules/
 
 # קבצי תצורה מקומיים
 config.local.js
+
+wp-config.php

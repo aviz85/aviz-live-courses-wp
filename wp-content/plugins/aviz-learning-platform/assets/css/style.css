@@ -63,6 +63,51 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+.aviz-course-header {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.aviz-course-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.aviz-course-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 15px;
+    margin: 0;
+    font-size: 2em;
+}
+
+.aviz-chapter {
+    margin-bottom: 30px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.aviz-chapter-title {
+    font-size: 1.5em;
+    color: #444;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 10px;
 }
 
 .aviz-content-list {
@@ -77,16 +122,18 @@
 
 .aviz-content-list a {
     display: block;
-    padding: 10px;
-    background-color: #f5f5f5;
+    padding: 10px 15px;
+    background-color: #fff;
     border-radius: 5px;
     text-decoration: none;
     color: #333;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .aviz-content-list a:hover {
-    background-color: #e0e0e0;
+    background-color: #e8f5e9;
+    transform: translateY(-2px);
 }
 
 .aviz-content-viewed a {
@@ -98,6 +145,11 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
+    color: #4CAF50;
+}
+
+.aviz-content-list i {
+    margin-right: 10px;
     color: #4CAF50;
 }
 
@@ -129,24 +181,67 @@
     gap: 20px;
 }
 
-.aviz-course-card {
-    background-color: #f5f5f5;
-    border-radius: 5px;
+.aviz-home-course-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.aviz-course-card h3 {
-    margin-top: 0;
+.aviz-home-course-card:hover {
+    transform: translateY(-5px);
+}
+
+.aviz-home-course-thumbnail {
     margin-bottom: 15px;
-    font-size: 1.2em;
-}
-
-.aviz-course-card .aviz-progress-bar {
-    margin-bottom: 15px;
-}
-
-.aviz-course-card .aviz-course-button {
-    display: block;
     text-align: center;
+}
+
+.aviz-home-course-thumbnail img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    object-fit: cover;
+    aspect-ratio: 16 / 9;
+}
+
+.aviz-home-progress-bar {
+    background-color: #e0e0e0;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.aviz-home-progress {
+    background-color: #4CAF50;
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.aviz-home-progress-text {
+    font-size: 0.9em;
+    color: #666;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.aviz-home-course-button {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.aviz-home-course-button:hover {
+    background-color: #45a049;
 }

@@ -1,0 +1,60 @@
+.aviz-dashboard {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.aviz-course-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.aviz-course-list li {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.aviz-course-list h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.aviz-progress-bar {
+    background-color: #e0e0e0;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.aviz-progress {
+    background-color: #4CAF50;
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.aviz-progress-text {
+    font-size: 0.9em;
+    color: #666;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.aviz-course-button {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.aviz-course-button:hover {
+    background-color: #45a049;
+}

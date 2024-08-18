@@ -13,6 +13,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/post-types.php';
 require_once plugin_dir_path(__FILE__) . 'includes/user-management.php';
 require_once plugin_dir_path(__FILE__) . 'includes/progress-tracking.php';
 require_once plugin_dir_path(__FILE__) . 'includes/frontend.php';
+require_once plugin_dir_path(__FILE__) . 'includes/ai-image-generation.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'aviz_learning_platform_activate');

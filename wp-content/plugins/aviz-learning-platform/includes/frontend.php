@@ -35,3 +35,12 @@ function aviz_debug_login_redirect($user_login, $user) {
     error_log('User ' . $user_login . ' logged in. Redirect function called.');
 }
 add_action('wp_login', 'aviz_debug_login_redirect', 10, 2);
+
+function aviz_enqueue_ai_image_scripts() {
+    wp_enqueue_script('aviz-ai-image', plugin_dir_url(__FILE__) . '../assets/js/ai-image-generation.js', array('jquery', 'wp-data', 'wp-editor'), '1.0', true);
+    wp_localize_script('aviz-ai-image', 'aviz_ai_image', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('aviz_ai_image_nonce'),
+    ));
+}
+add_action('admin_enqueue_scripts', 'aviz_enqueue_ai_image_scripts');

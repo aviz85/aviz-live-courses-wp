@@ -103,3 +103,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Sets up WordPress vars and included files. */
 require_once ABSPATH . 'wp-settings.php';
+
+define('REPLICATE_API_TOKEN', 'r8_PgomATXak5XuwjMk6TXvCQveQVfKJgQ3eMaeE');

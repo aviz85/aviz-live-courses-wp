@@ -1,0 +1,104 @@
+.aviz-home-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Arial', sans-serif;
+}
+
+.aviz-home-page h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.aviz-intro {
+    text-align: center;
+    color: #34495e;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.aviz-guest-message {
+    background: linear-gradient(135deg, #f6f8fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.aviz-guest-message h2 {
+    color: #3498db;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.aviz-guest-message p {
+    color: #34495e;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.aviz-cta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.aviz-login-button {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+}
+
+.aviz-login-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+}
+
+.aviz-register-info {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+.aviz-register-info a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.aviz-register-info a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .aviz-home-page {
+        padding: 1rem;
+    }
+
+    .aviz-home-page h1 {
+        font-size: 2rem;
+    }
+
+    .aviz-guest-message {
+        padding: 2rem;
+    }
+
+    .aviz-guest-message h2 {
+        font-size: 1.75rem;
+    }
+}

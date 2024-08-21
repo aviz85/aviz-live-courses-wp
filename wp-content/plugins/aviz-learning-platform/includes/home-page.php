@@ -10,8 +10,8 @@ function aviz_home_page_content() {
 
         <?php if (!is_user_logged_in()) : ?>
             <div class="aviz-guest-message">
-                <h2>גלו עולם של ידע וצמיחה אישית</h2>
-                <p>ברוכים הבאים לפלטפורמת הלמידה המתקדמת של אביץ. כאן תוכלו לצפות בקורסים איכותיים, להתפתח מקצועית ולהרחיב את האופקים שלכם.</p>
+                <h2>הצטרפו למסע של התפתחות והעשרה</h2>
+                <p>פלטפורמת הלמידה של אביץ מציעה מגוון קורסים איכותיים המותאמים לצרכים המקצועיים של היום. גלו הזדמנויות חדשות להתקדם ולהצליח בקריירה שלכם.</p>
                 <div class="aviz-cta-container">
                     <a href="<?php echo esc_url(wp_login_url()); ?>" class="aviz-login-button">כניסה למשתמשים רשומים</a>
                     <?php
@@ -22,9 +22,7 @@ function aviz_home_page_content() {
                     <p class="aviz-register-info">אין לך חשבון? <a href="<?php echo esc_url($whatsapp_link); ?>" target="_blank">צור קשר עם אביץ</a> לקבלת פרטי גישה.</p>
                 </div>
             </div>
-        <?php endif; ?>
-
-        <?php if (is_user_logged_in()) : ?>
+        <?php else : ?>
             <?php
             $user_id = get_current_user_id();
             $is_admin = current_user_can('manage_options');

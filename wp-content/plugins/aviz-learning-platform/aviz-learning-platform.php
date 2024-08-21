@@ -33,6 +33,7 @@ function aviz_learning_platform_deactivate() {
 
 function aviz_enqueue_scripts() {
     wp_enqueue_style('aviz-styles', plugins_url('assets/css/style.css', __FILE__));
+    wp_enqueue_style('aviz-home-page', plugins_url('assets/css/aviz-home-page.css', __FILE__), array(), '1.0.0');
     wp_enqueue_script('aviz-content-script', plugins_url('assets/js/aviz-content.js', __FILE__), array('jquery'), '1.0', true);
     wp_localize_script('aviz-content-script', 'aviz_ajax_object', array(
         'ajax_url' => admin_url('admin-ajax.php'),

@@ -10,8 +10,12 @@ function aviz_home_page_content() {
 
         <?php if (!is_user_logged_in()) : ?>
             <div class="aviz-guest-message">
-                <p>האתר הזה נועד עבור משתמשים רשומים בלבד.</p>
-                <a href="<?php echo esc_url(wp_registration_url()); ?>" class="aviz-register-button">הירשם עכשיו</a>
+                <h2>גלו עולם של ידע וצמיחה אישית</h2>
+                <p>ברוכים הבאים לפלטפורמת הלמידה המתקדמת של אביץ. כאן תוכלו לצפות בקורסים איכותיים, להתפתח מקצועית ולהרחיב את האופקים שלכם.</p>
+                <div class="aviz-cta-container">
+                    <a href="<?php echo esc_url(wp_login_url()); ?>" class="aviz-login-button">כניסה למשתמשים רשומים</a>
+                    <p class="aviz-register-info">אין לך חשבון? <a href="mailto:contact@aviz.co.il">צור קשר עם אביץ</a> לקבלת פרטי גישה.</p>
+                </div>
             </div>
         <?php else : ?>
             <?php

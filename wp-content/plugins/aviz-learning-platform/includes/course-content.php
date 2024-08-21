@@ -42,7 +42,8 @@ function aviz_course_content($atts) {
                     'value' => $chapter->term_id,
                 ),
             ),
-            'orderby' => 'menu_order',
+            'meta_key' => '_aviz_content_order',
+            'orderby' => 'meta_value_num',
             'order' => 'ASC',
             'numberposts' => -1,
         ));

@@ -156,3 +156,70 @@ function aviz_register_chapter_taxonomy() {
     register_taxonomy( 'aviz_chapter', array( 'aviz_course' ), $args );
 }
 add_action( 'init', 'aviz_register_chapter_taxonomy', 0 );
+
+function aviz_add_content_order_field() {
+    add_meta_box(
+        'aviz_content_order',
+        'סדר הופעה בקורס',
+        'aviz_content_order_callback',
+        'aviz_content',
+        'side',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'aviz_add_content_order_field');
+
+function aviz_content_order_callback($post) {
+    wp_nonce_field('aviz_content_order_nonce', 'aviz_content_order_nonce');
+    $value = get_post_meta($post->ID, '_aviz_content_order', true);
+    echo '<label for="aviz_content_order">סדר הופעה:</label> ';
+    echo '<input type="number" id="aviz_content_order" name="aviz_content_order" value="' . esc_attr($value) . '" min="0" step="1">';
+}
+
+function aviz_save_content_order($post_id) {
+    if (!isset($_POST['aviz_content_order_nonce']) || !wp_verify_nonce($_POST['aviz_content_order_nonce'], 'aviz_content_order_nonce')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    if (isset($_POST['aviz_content_order'])) {
+        update_post_meta($post_id, '_aviz_content_order', intval($_POST['aviz_content_order']));
+    }
+}
+add_action('save_post_aviz_content', 'aviz_save_content_order');
+
+function aviz_set_default_content_order($post_id, $post, $update) {
+    if ($post->post_type !== 'aviz_content' || $update) {
+        return;
+    }
+
+    $existing_order = get_post_meta($post_id, '_aviz_content_order', true);
+    if (empty($existing_order)) {
+        $course_id = get_post_meta($post_id, '_aviz_associated_course', true);
+        $chapter_id = get_post_meta($post_id, '_aviz_associated_chapter', true);
+
+        $max_order = get_posts(array(
+            'post_type' => 'aviz_content',
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => '_aviz_associated_course',
+                    'value' => $course_id,
+                ),
+                array(
+                    'key' => '_aviz_associated_chapter',
+                    'value' => $chapter_id,
+                ),
+            ),
+            'meta_key' => '_aviz_content_order',
+            'orderby' => 'meta_value_num',
+            'order' => 'DESC',
+            'numberposts' => 1,
+        ));
+
+        $new_order = empty($max_order) ? 0 : (intval(get_post_meta($max_order[0]->ID, '_aviz_content_order', true)) + 1);
+        update_post_meta($post_id, '_aviz_content_order', $new_order);
+    }
+}
+add_action('wp_insert_post', 'aviz_set_default_content_order', 10, 3);

@@ -29,3 +29,5 @@ node_modules/
 config.local.js
 
 wp-config.php
+
+wp-content/uploads/

@@ -1,6 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
+require_once plugin_dir_path(__FILE__) . 'progress-tracking.php';
+
 function aviz_home_page_content() {
     ob_start();
     ?>

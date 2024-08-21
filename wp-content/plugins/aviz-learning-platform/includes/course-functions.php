@@ -5,35 +5,28 @@ if (!function_exists('aviz_get_course_contents')) {
     function aviz_get_course_contents($course_id) {
         $chapters = get_posts(array(
             'post_type' => 'aviz_chapter',
-            'numberposts' => -1,
-            'meta_query' => array(
-                array(
-                    'key' => '_aviz_associated_course',
-                    'value' => $course_id,
-                ),
-            ),
-            'meta_key' => '_aviz_chapter_order',
+            'meta_key' => '_aviz_associated_course',
+            'meta_value' => $course_id,
             'orderby' => 'meta_value_num',
-            'order' => 'ASC'
+            'meta_key' => '_aviz_chapter_order',
+            'order' => 'ASC',
+            'numberposts' => -1
         ));
 
-        $all_contents = array();
+        $contents = array();
         foreach ($chapters as $chapter) {
-            $contents = get_posts(array(
+            $chapter_contents = get_posts(array(
                 'post_type' => 'aviz_content',
-                'numberposts' => -1,
-                'meta_query' => array(
-                    array(
-                        'key' => '_aviz_associated_chapter',
-                        'value' => $chapter->ID,
-                    ),
-                ),
-                'meta_key' => '_aviz_content_order',
+                'meta_key' => '_aviz_associated_chapter',
+                'meta_value' => $chapter->ID,
                 'orderby' => 'meta_value_num',
-                'order' => 'ASC'
+                'meta_key' => '_aviz_content_order',
+                'order' => 'ASC',
+                'numberposts' => -1
             ));
-            $all_contents = array_merge($all_contents, $contents);
+            $contents = array_merge($contents, $chapter_contents);
         }
-        return $all_contents;
+
+        return $contents;
     }
 }

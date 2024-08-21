@@ -1,6 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
+require_once plugin_dir_path(__FILE__) . 'progress-tracking.php';
+
 function aviz_enqueue_dashboard_styles() {
     wp_enqueue_style('aviz-dashboard-styles', plugin_dir_url(__FILE__) . '../assets/css/dashboard.css');
 }

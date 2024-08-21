@@ -75,10 +75,9 @@ function aviz_course_content($atts) {
 
                 $is_viewed = in_array($content->ID, $viewed_content);
                 $class = $is_viewed ? 'aviz-content-viewed' : '';
-                $completion_indicator = $is_viewed ? '<span class="aviz-completion-indicator">✓</span>' : '';
 
                 $output .= '<li class="' . $class . '">';
-                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span>' . $completion_indicator . '</a>';
+                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span></a>';
                 $output .= '</li>';
             }
 

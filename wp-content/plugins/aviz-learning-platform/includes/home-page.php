@@ -14,10 +14,17 @@ function aviz_home_page_content() {
                 <p>ברוכים הבאים לפלטפורמת הלמידה המתקדמת של אביץ. כאן תוכלו לצפות בקורסים איכותיים, להתפתח מקצועית ולהרחיב את האופקים שלכם.</p>
                 <div class="aviz-cta-container">
                     <a href="<?php echo esc_url(wp_login_url()); ?>" class="aviz-login-button">כניסה למשתמשים רשומים</a>
-                    <p class="aviz-register-info">אין לך חשבון? <a href="mailto:contact@aviz.co.il">צור קשר עם אביץ</a> לקבלת פרטי גישה.</p>
+                    <?php
+                    $whatsapp_number = '972503973736';
+                    $whatsapp_message = urlencode('היי, אני מעוניין לקבל פרטי גישה לפלטפורמת הלמידה של אביץ.');
+                    $whatsapp_link = "https://wa.me/{$whatsapp_number}?text={$whatsapp_message}";
+                    ?>
+                    <p class="aviz-register-info">אין לך חשבון? <a href="<?php echo esc_url($whatsapp_link); ?>" target="_blank">צור קשר עם אביץ</a> לקבלת פרטי גישה.</p>
                 </div>
             </div>
-        <?php else : ?>
+        <?php endif; ?>
+
+        <?php if (is_user_logged_in()) : ?>
             <?php
             $user_id = get_current_user_id();
             $is_admin = current_user_can('manage_options');

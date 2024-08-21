@@ -31,8 +31,7 @@ function aviz_learning_platform_deactivate() {
     // Deactivation tasks (if any)
 }
 
-// Change this function name
-function aviz_plugin_enqueue_scripts() {
+function aviz_enqueue_scripts() {
     wp_enqueue_style('aviz-styles', plugins_url('assets/css/style.css', __FILE__));
     wp_enqueue_script('aviz-content-script', plugins_url('assets/js/aviz-content.js', __FILE__), array('jquery'), '1.0', true);
     wp_localize_script('aviz-content-script', 'aviz_ajax_object', array(
@@ -40,8 +39,7 @@ function aviz_plugin_enqueue_scripts() {
         'nonce' => wp_create_nonce('aviz_content_nonce')
     ));
 }
-// Update the action hook to use the new function name
-add_action('wp_enqueue_scripts', 'aviz_plugin_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'aviz_enqueue_scripts');
 
 function aviz_load_content_template($template) {
     if (is_singular('aviz_content')) {
@@ -54,19 +52,31 @@ function aviz_load_content_template($template) {
 }
 add_filter('single_template', 'aviz_load_content_template');
 
-// הוסף את הפונקציה הזו
 function aviz_set_default_user_meta($user_id) {
-    // בדוק אם המטא-דאטה כבר קיים
     $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
     
-    // אם לא קיים, צור מערך ריק
     if (empty($viewed_content)) {
         update_user_meta($user_id, 'aviz_viewed_content', array());
     }
 }
-
-// הפעל את הפונקציה כאשר משתמש חדש נרשם
 add_action('user_register', 'aviz_set_default_user_meta');
-
-// הפעל את הפונקציה גם כאשר משתמש מתחבר (למקרה שמשתמשים קיימים חסר להם המטא-דאטה)
 add_action('wp_login', 'aviz_set_default_user_meta', 10, 2);
+
+function aviz_add_smooth_scroll_script() {
+    ?>
+    <script>
+    jQuery(document).ready(function($) {
+        // Smooth scroll to anchor
+        if (window.location.hash) {
+            var target = $(window.location.hash);
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 100 // Adjust the offset as needed
+                }, 1000);
+            }
+        }
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'aviz_add_smooth_scroll_script');

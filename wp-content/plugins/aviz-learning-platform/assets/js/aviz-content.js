@@ -34,4 +34,14 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         alert('יש לסמן את התוכן הנוכחי כהושלם לפני המעבר לתוכן הבא.');
     });
+
+    // Smooth scroll to anchor
+    if (window.location.hash) {
+        var target = $(window.location.hash);
+        if (target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 100 // Adjust the offset as needed
+            }, 1000);
+        }
+    }
 });

@@ -63,8 +63,8 @@ function aviz_course_content($atts) {
 
         if (!empty($contents)) {
             $has_content = true;
-            $output .= '<div class="aviz-chapter">';
-            $output .= '<h3 class="aviz-chapter-title">' . esc_html($chapter->post_title) . '</h3>';
+            $output .= '<div id="chapter-' . $chapter->ID . '" class="aviz-chapter">';
+            $output .= '<h2 class="aviz-chapter-title">' . esc_html($chapter->post_title) . '</h2>';
             $output .= '<ul class="aviz-content-list">';
 
             foreach ($contents as $content) {

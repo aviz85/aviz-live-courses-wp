@@ -30,17 +30,16 @@ while ( have_posts() ) :
         </div>
 
         <div class="aviz-content-navigation">
-            <h2 class="aviz-chapter-title"><?php echo esc_html($chapter->post_title); ?></h2>
             <div class="aviz-breadcrumbs">
                 <a href="<?php echo get_permalink($course_id); ?>"><?php echo esc_html($course->post_title); ?></a> &gt;
-                <a href="<?php echo get_permalink($chapter_id); ?>"><?php echo esc_html($chapter->post_title); ?></a> &gt;
+                <a href="<?php echo get_permalink($course_id) . '#chapter-' . $chapter_id; ?>"><?php echo esc_html($chapter->post_title); ?></a> &gt;
                 <span><?php the_title(); ?></span>
             </div>
         </div>
         
         <article id="post-<?php the_ID(); ?>" <?php post_class('aviz-single-content'); ?>>
             <header class="entry-header">
-                <h3 class="entry-title"><?php the_title(); ?></h3>
+                <h2 class="entry-title"><?php the_title(); ?></h2>
             </header>
 
             <div class="entry-content">

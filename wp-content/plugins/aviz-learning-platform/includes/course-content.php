@@ -77,7 +77,7 @@ function aviz_course_content($atts) {
                 $class = $is_viewed ? 'aviz-content-viewed' : '';
 
                 $output .= '<li class="' . $class . '">';
-                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span></a>';
+                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . ' <span class="aviz-content-title">' . esc_html($content->post_title) . '</span></a>';
                 $output .= '</li>';
             }
 
@@ -99,12 +99,12 @@ add_shortcode('aviz_course_content', 'aviz_course_content');
 function aviz_get_content_type_icon($content_type) {
     switch ($content_type) {
         case 'lesson':
-            return '<i class="fas fa-book"></i>';
+            return '<i class="fas fa-book aviz-content-icon"></i>';
         case 'quiz':
-            return '<i class="fas fa-question-circle"></i>';
+            return '<i class="fas fa-question-circle aviz-content-icon"></i>';
         case 'video':
-            return '<i class="fas fa-video"></i>';
+            return '<i class="fas fa-video aviz-content-icon"></i>';
         default:
-            return '<i class="fas fa-file"></i>';
+            return '<i class="fas fa-file aviz-content-icon"></i>';
     }
 }

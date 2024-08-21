@@ -5,6 +5,7 @@ require_once plugin_dir_path(__FILE__) . '../includes/course-functions.php';
 while ( have_posts() ) :
     the_post();
     $content_id = get_the_ID();
+
     $user_id = get_current_user_id();
     $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
     $is_viewed = is_array($viewed_content) && in_array($content_id, $viewed_content);

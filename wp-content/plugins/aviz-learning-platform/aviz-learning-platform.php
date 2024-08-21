@@ -17,6 +17,8 @@ require_once plugin_dir_path(__FILE__) . 'includes/ai-image-generation.php';
 require_once plugin_dir_path(__FILE__) . 'includes/course-functions.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
 require_once plugin_dir_path(__FILE__) . 'includes/bulk-user-registration.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-access-control.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-ajax-handler.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'aviz_learning_platform_activate');
@@ -39,6 +41,11 @@ function aviz_enqueue_scripts() {
     wp_localize_script('aviz-content-script', 'aviz_ajax_object', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('aviz_content_nonce')
+    ));
+    wp_enqueue_script('aviz-content-loader', plugin_dir_url(__FILE__) . 'assets/js/aviz-content-loader.js', array('jquery'), '1.0', true);
+    wp_localize_script('aviz-content-loader', 'aviz_ajax', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('aviz_ajax_nonce')
     ));
 }
 add_action('wp_enqueue_scripts', 'aviz_enqueue_scripts');
@@ -82,3 +89,22 @@ function aviz_add_smooth_scroll_script() {
     <?php
 }
 add_action('wp_footer', 'aviz_add_smooth_scroll_script');
+
+function aviz_add_rewrite_rules() {
+    add_rewrite_rule('^unauthorized/?', 'index.php?aviz_unauthorized=1', 'top');
+}
+add_action('init', 'aviz_add_rewrite_rules');
+
+function aviz_query_vars($vars) {
+    $vars[] = 'aviz_unauthorized';
+    return $vars;
+}
+add_filter('query_vars', 'aviz_query_vars');
+
+function aviz_template_include($template) {
+    if (get_query_var('aviz_unauthorized')) {
+        return plugin_dir_path(__FILE__) . 'templates/unauthorized.php';
+    }
+    return $template;
+}
+add_filter('template_include', 'aviz_template_include');

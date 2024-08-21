@@ -5,8 +5,10 @@ function aviz_course_content($atts) {
     $atts = shortcode_atts(array('id' => 0), $atts, 'aviz_course_content');
     $course_id = intval($atts['id']);
 
-    if (!$course_id || !is_user_logged_in()) {
-        return '<p>אין גישה לתוכן זה.</p>';
+    // Check access using Aviz_Access_Control
+    $access = Aviz_Access_Control::user_has_access($course_id);
+    if (!$access['has_access']) {
+        return '<p>' . esc_html($access['message']) . '</p>';
     }
 
     $user_id = get_current_user_id();

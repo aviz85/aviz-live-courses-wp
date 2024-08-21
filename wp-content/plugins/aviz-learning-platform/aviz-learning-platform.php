@@ -16,6 +16,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/frontend.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ai-image-generation.php';
 require_once plugin_dir_path(__FILE__) . 'includes/course-functions.php';
 require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
+require_once plugin_dir_path(__FILE__) . 'includes/bulk-user-registration.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'aviz_learning_platform_activate');

@@ -277,3 +277,35 @@ function aviz_save_chapter_course($post_id) {
     }
 }
 add_action('save_post_aviz_chapter', 'aviz_save_chapter_course');
+
+// Add this function at the end of the file
+function aviz_add_viewed_status_field() {
+    add_meta_box(
+        'aviz_viewed_status',
+        'סטטוס צפייה',
+        'aviz_viewed_status_callback',
+        'aviz_content',
+        'side',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'aviz_add_viewed_status_field');
+
+function aviz_viewed_status_callback($post) {
+    wp_nonce_field('aviz_viewed_status_nonce', 'aviz_viewed_status_nonce');
+    $value = get_post_meta($post->ID, '_aviz_viewed_status', true);
+    echo '<label for="aviz_viewed_status">נצפה:</label> ';
+    echo '<input type="checkbox" id="aviz_viewed_status" name="aviz_viewed_status" value="1" ' . checked($value, '1', false) . '>';
+}
+
+function aviz_save_viewed_status($post_id) {
+    if (!isset($_POST['aviz_viewed_status_nonce']) || !wp_verify_nonce($_POST['aviz_viewed_status_nonce'], 'aviz_viewed_status_nonce')) {
+        return;
+    }
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+    $viewed_status = isset($_POST['aviz_viewed_status']) ? '1' : '0';
+    update_post_meta($post_id, '_aviz_viewed_status', $viewed_status);
+}
+add_action('save_post_aviz_content', 'aviz_save_viewed_status');

@@ -38,7 +38,11 @@ function aviz_course_content($atts) {
     $output .= '</div>';
 
     $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
-    if (!is_array($viewed_content)) $viewed_content = array();
+    
+    // וודא שהמערך קיים ולא ריק
+    if (empty($viewed_content) || !is_array($viewed_content)) {
+        $viewed_content = array();
+    }
 
     $has_content = false;
 
@@ -67,15 +71,13 @@ function aviz_course_content($atts) {
                 $content_type = get_post_meta($content->ID, '_aviz_content_type', true);
                 $icon = aviz_get_content_type_icon($content_type);
 
-                $is_viewed = in_array($content->ID, $viewed_content) || $is_admin;
-                $class = $is_viewed ? 'aviz-content-viewed' : 'aviz-content-not-viewed';
+                $is_viewed = in_array($content->ID, $viewed_content);
+                $class = $is_viewed ? 'aviz-content-viewed' : '';
+                $completion_indicator = $is_viewed ? '<span class="aviz-completion-indicator">✓</span>' : '';
 
                 $output .= '<li class="' . $class . '">';
-                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span>';
-                if ($is_viewed) {
-                    $output .= '<span class="aviz-viewed-indicator">✓</span>';
-                }
-                $output .= '</a></li>';
+                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span>' . $completion_indicator . '</a>';
+                $output .= '</li>';
             }
 
             $output .= '</ul>';

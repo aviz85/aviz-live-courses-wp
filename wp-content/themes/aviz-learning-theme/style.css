@@ -140,3 +140,135 @@ body {
     text-decoration: none;
     border-radius: 3px;
 }
+
+/* Course Content Styles */
+.aviz-content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.aviz-course-header {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.aviz-course-thumbnail {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.aviz-course-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* הפס האפור */
+    color: white;
+    padding: 15px;
+    margin: 0;
+    font-size: 32px;
+}
+
+.aviz-content-navigation {
+    padding: 0 20px;
+}
+
+.aviz-chapter-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.aviz-breadcrumbs {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.aviz-single-content {
+    padding: 0 20px;
+}
+
+.entry-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.entry-content {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 30px;
+}
+
+.entry-content p {
+    margin-bottom: 20px;
+}
+
+/* Remove any floating elements */
+.clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.aviz-content-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.aviz-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.aviz-button:hover {
+    background-color: #2980b9;
+}
+
+.aviz-button.aviz-completed {
+    background-color: #27ae60;
+}
+
+.aviz-button.aviz-disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .aviz-content-wrapper {
+        padding: 20px 10px;
+    }
+
+    .aviz-course-title {
+        font-size: 24px;
+    }
+
+    .aviz-chapter-title {
+        font-size: 20px;
+    }
+
+    .entry-title {
+        font-size: 20px;
+    }
+
+    .aviz-content-navigation {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .aviz-button {
+        margin-bottom: 10px;
+    }
+}

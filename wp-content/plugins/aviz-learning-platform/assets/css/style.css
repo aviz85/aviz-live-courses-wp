@@ -118,19 +118,19 @@
 .aviz-content-list li {
     list-style-type: none;
     margin-bottom: 10px;
-    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .aviz-content-list li a {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     text-decoration: none;
     color: #333;
     padding: 10px 15px;
     background-color: #fff;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
 }
 
 .aviz-content-list li a i {
@@ -145,33 +145,26 @@
 
 .aviz-content-list li a span {
     flex-grow: 1;
-    margin-right: 20px;
 }
 
-.aviz-content-viewed {
-    opacity: 0.7;
-}
-
-.aviz-viewed-indicator {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #4CAF50;
-}
-
-.aviz-content-list a:hover {
+.aviz-content-list li.aviz-content-viewed a {
     background-color: #e8f5e9;
-    transform: translateY(-2px);
 }
 
-.aviz-content-viewed a {
-    background-color: #e8f5e9;
+.aviz-content-list li:hover a,
+.aviz-content-list li.aviz-content-viewed:hover a {
+    background-color: #c8e6c9;
 }
 
 .aviz-content-list i {
     margin-right: 10px;
     color: #4CAF50;
+}
+
+.aviz-completion-indicator {
+    margin-left: 10px;
+    color: #4CAF50;
+    font-weight: bold;
 }
 
 /* Added styles for the home page */
@@ -298,4 +291,68 @@
 
 #add-chapter {
     margin-top: 10px;
+}
+
+.aviz-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.aviz-button:hover {
+    background-color: #45a049;
+}
+
+.aviz-button.aviz-completed {
+    background-color: #888;
+}
+
+.aviz-button.aviz-completed:hover {
+    background-color: #777;
+}
+
+.aviz-content-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+.aviz-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.aviz-button:hover {
+    background-color: #45a049;
+}
+
+.aviz-button.aviz-completed {
+    background-color: #2196F3;
+}
+
+.aviz-button.aviz-disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.aviz-prev-content, .aviz-next-content, .aviz-back-to-course {
+    flex: 1;
+    text-align: center;
+    margin: 0 5px;
+}
+
+#aviz-mark-complete {
+    flex: 2;
 }

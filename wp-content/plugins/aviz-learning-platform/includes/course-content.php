@@ -71,11 +71,11 @@ function aviz_course_content($atts) {
                 $class = $is_viewed ? 'aviz-content-viewed' : 'aviz-content-not-viewed';
 
                 $output .= '<li class="' . $class . '">';
-                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . ' ' . esc_html($content->post_title) . '</a>';
+                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . '<span>' . esc_html($content->post_title) . '</span>';
                 if ($is_viewed) {
                     $output .= '<span class="aviz-viewed-indicator">✓</span>';
                 }
-                $output .= '</li>';
+                $output .= '</a></li>';
             }
 
             $output .= '</ul>';

@@ -44,3 +44,8 @@ function aviz_enqueue_ai_image_scripts() {
     ));
 }
 add_action('admin_enqueue_scripts', 'aviz_enqueue_ai_image_scripts');
+
+function aviz_enqueue_font_awesome() {
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+}
+add_action('wp_enqueue_scripts', 'aviz_enqueue_font_awesome');

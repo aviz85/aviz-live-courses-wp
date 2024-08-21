@@ -116,19 +116,48 @@
 }
 
 .aviz-content-list li {
+    list-style-type: none;
     margin-bottom: 10px;
     position: relative;
 }
 
-.aviz-content-list a {
-    display: block;
+.aviz-content-list li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
     padding: 10px 15px;
     background-color: #fff;
     border-radius: 5px;
-    text-decoration: none;
-    color: #333;
     transition: background-color 0.3s ease, transform 0.2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.aviz-content-list li a i {
+    margin-right: 20px;
+    font-size: 1.2em;
+    width: 25px;
+    text-align: center;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+.aviz-content-list li a span {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.aviz-content-viewed {
+    opacity: 0.7;
+}
+
+.aviz-viewed-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4CAF50;
 }
 
 .aviz-content-list a:hover {
@@ -138,14 +167,6 @@
 
 .aviz-content-viewed a {
     background-color: #e8f5e9;
-}
-
-.aviz-viewed-indicator {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #4CAF50;
 }
 
 .aviz-content-list i {

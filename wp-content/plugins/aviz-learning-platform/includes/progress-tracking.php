@@ -20,32 +20,34 @@ add_action('wp_head', function() {
 });
 
 function aviz_get_user_progress($user_id, $course_id) {
-    $course_content = get_posts(array(
-        'post_type' => 'aviz_content',
-        'meta_query' => array(
-            array(
-                'key' => 'aviz_course',
-                'value' => $course_id,
-            ),
-        ),
-        'numberposts' => -1,
-    ));
+    $chapters = get_post_meta($course_id, 'chapters', true);
+    if (!is_array($chapters)) {
+        return array('viewed' => 0, 'total' => 0, 'percentage' => 0);
+    }
 
-    $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
-    if (!is_array($viewed_content)) $viewed_content = array();
+    $total_contents = 0;
+    $viewed_contents = 0;
+    $viewed_content_ids = get_user_meta($user_id, 'aviz_viewed_content', true);
+    if (!is_array($viewed_content_ids)) {
+        $viewed_content_ids = array();
+    }
 
-    $total_content = count($course_content);
-    $viewed_count = 0;
-
-    foreach ($course_content as $content) {
-        if (in_array($content->ID, $viewed_content)) {
-            $viewed_count++;
+    foreach ($chapters as $chapter) {
+        if (isset($chapter['contents']) && is_array($chapter['contents'])) {
+            foreach ($chapter['contents'] as $content) {
+                $total_contents++;
+                if (in_array($content['content'], $viewed_content_ids)) {
+                    $viewed_contents++;
+                }
+            }
         }
     }
 
+    $percentage = ($total_contents > 0) ? round(($viewed_contents / $total_contents) * 100) : 0;
+
     return array(
-        'total' => $total_content,
-        'viewed' => $viewed_count,
-        'percentage' => $total_content > 0 ? ($viewed_count / $total_content) * 100 : 0,
+        'viewed' => $viewed_contents,
+        'total' => $total_contents,
+        'percentage' => $percentage
     );
 }

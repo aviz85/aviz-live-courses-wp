@@ -245,3 +245,36 @@
 .aviz-home-course-button:hover {
     background-color: #45a049;
 }
+
+.aviz-chapter {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+.aviz-chapter input[type="text"] {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.aviz-chapter-contents {
+    margin-top: 10px;
+}
+
+.aviz-content-select {
+    width: 100%;
+    height: 100px;
+}
+
+.remove-chapter {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#add-chapter {
+    margin-top: 10px;
+}

@@ -17,9 +17,18 @@ function aviz_course_content($atts) {
         return '<p>אין לך גישה לקורס זה.</p>';
     }
 
-    $chapters = get_terms(array(
-        'taxonomy' => 'aviz_chapter',
-        'hide_empty' => false,
+    $chapters = get_posts(array(
+        'post_type' => 'aviz_chapter',
+        'numberposts' => -1,
+        'meta_query' => array(
+            array(
+                'key' => '_aviz_associated_course',
+                'value' => $course_id,
+            ),
+        ),
+        'meta_key' => '_aviz_chapter_order',
+        'orderby' => 'meta_value_num',
+        'order' => 'ASC'
     ));
 
     $output = '<div class="aviz-course-content">';
@@ -28,35 +37,33 @@ function aviz_course_content($atts) {
     $output .= '<h2 class="aviz-course-title">' . get_the_title($course_id) . '</h2>';
     $output .= '</div>';
 
+    $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
+    if (!is_array($viewed_content)) $viewed_content = array();
+
+    $has_content = false;
+
     foreach ($chapters as $chapter) {
-        $chapter_content = get_posts(array(
+        $contents = get_posts(array(
             'post_type' => 'aviz_content',
+            'numberposts' => -1,
             'meta_query' => array(
-                'relation' => 'AND',
-                array(
-                    'key' => '_aviz_associated_course',
-                    'value' => $course_id,
-                ),
                 array(
                     'key' => '_aviz_associated_chapter',
-                    'value' => $chapter->term_id,
+                    'value' => $chapter->ID,
                 ),
             ),
             'meta_key' => '_aviz_content_order',
             'orderby' => 'meta_value_num',
-            'order' => 'ASC',
-            'numberposts' => -1,
+            'order' => 'ASC'
         ));
 
-        if (!empty($chapter_content)) {
+        if (!empty($contents)) {
+            $has_content = true;
             $output .= '<div class="aviz-chapter">';
-            $output .= '<h3 class="aviz-chapter-title">' . $chapter->name . '</h3>';
+            $output .= '<h3 class="aviz-chapter-title">' . esc_html($chapter->post_title) . '</h3>';
             $output .= '<ul class="aviz-content-list">';
 
-            $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
-            if (!is_array($viewed_content)) $viewed_content = array();
-
-            foreach ($chapter_content as $content) {
+            foreach ($contents as $content) {
                 $content_type = get_post_meta($content->ID, '_aviz_content_type', true);
                 $icon = aviz_get_content_type_icon($content_type);
 
@@ -64,7 +71,7 @@ function aviz_course_content($atts) {
                 $class = $is_viewed ? 'aviz-content-viewed' : 'aviz-content-not-viewed';
 
                 $output .= '<li class="' . $class . '">';
-                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . ' ' . $content->post_title . '</a>';
+                $output .= '<a href="' . get_permalink($content->ID) . '">' . $icon . ' ' . esc_html($content->post_title) . '</a>';
                 if ($is_viewed) {
                     $output .= '<span class="aviz-viewed-indicator">✓</span>';
                 }
@@ -74,6 +81,10 @@ function aviz_course_content($atts) {
             $output .= '</ul>';
             $output .= '</div>';
         }
+    }
+
+    if (!$has_content) {
+        $output .= '<p>אין תוכן זמין בקורס זה כרגע.</p>';
     }
 
     $output .= '</div>';

@@ -5,31 +5,22 @@ while (have_posts()) :
     the_post();
     $quiz_id = get_the_ID();
     $time_limit = get_post_meta($quiz_id, '_aviz_quiz_time_limit', true);
-    $show_correct_answers = get_post_meta(get_the_ID(), '_aviz_quiz_show_correct_answers', true);
+    $show_correct_answers = get_post_meta($quiz_id, '_aviz_quiz_show_correct_answers', true);
     $user_id = get_current_user_id();
-    $attempts = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_attempts', true);
-    $quiz_completed = !empty($attempts);
-    $last_attempt = $quiz_completed ? end($attempts) : null;
-    $quiz_score = $last_attempt ? $last_attempt['score'] : 0;
-    $user_answers = $last_attempt ? $last_attempt['answers'] : array();
+    $quiz_completed = aviz_user_completed_quiz($user_id, $quiz_id);
+    $last_score = $quiz_completed ? aviz_get_user_last_quiz_score($user_id, $quiz_id) : null;
+    $last_attempt_date = $quiz_completed ? aviz_get_user_last_quiz_date($user_id, $quiz_id) : null;
     ?>
 
     <div class="aviz-quiz-container">
         <h1><?php the_title(); ?></h1>
         
         <?php
-        $questions = get_post_meta(get_the_ID(), '_aviz_quiz_questions', true);
-        $time_limit = get_post_meta(get_the_ID(), '_aviz_quiz_time_limit', true);
-        $show_correct_answers = get_post_meta(get_the_ID(), '_aviz_quiz_show_correct_answers', true);
-        $user_id = get_current_user_id();
-        $quiz_completed = !empty($attempts);
-        $last_attempt = $quiz_completed ? end($attempts) : null;
-        $quiz_score = $last_attempt ? $last_attempt['score'] : 0;
-        $user_answers = $last_attempt ? $last_attempt['answers'] : array();
+        $questions = get_post_meta($quiz_id, '_aviz_quiz_questions', true);
         ?>
 
         <?php if (!$quiz_completed) : ?>
-            <form id="aviz-quiz-form" data-quiz-id="<?php echo get_the_ID(); ?>">
+            <form id="aviz-quiz-form" data-quiz-id="<?php echo $quiz_id; ?>">
                 <?php foreach ($questions as $index => $question) : ?>
                     <div class="aviz-quiz-question">
                         <h3>שאלה <?php echo $index + 1; ?></h3>
@@ -47,8 +38,10 @@ while (have_posts()) :
         <?php else : ?>
             <div id="aviz-quiz-result">
                 <h2>תוצאות המבחן האחרון</h2>
-                <p>הציון שלך: <?php echo number_format($quiz_score, 2); ?>%</p>
-                <p>תאריך: <?php echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($last_attempt['date'])); ?></p>
+                <p>הציון שלך: <?php echo number_format($last_score, 2); ?>%</p>
+                <?php if ($last_attempt_date) : ?>
+                    <p>תאריך: <?php echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($last_attempt_date)); ?></p>
+                <?php endif; ?>
             </div>
 
             <button id="retake-quiz" class="aviz-quiz-button">בצע את המבחן מחדש</button>
@@ -56,7 +49,10 @@ while (have_posts()) :
             <?php if ($show_correct_answers === '1') : ?>
                 <button id="show-quiz-solution" class="aviz-quiz-button">הצג את הפתרון הנכון</button>
                 <div id="aviz-quiz-answers" style="display: none;">
-                    <?php foreach ($questions as $index => $question) : ?>
+                    <?php 
+                    $user_answers = aviz_get_user_last_quiz_answers($user_id, $quiz_id);
+                    foreach ($questions as $index => $question) : 
+                    ?>
                         <div class="aviz-quiz-question">
                             <h4>שאלה <?php echo $index + 1; ?></h4>
                             <p class="question-text"><?php echo esc_html($question['text']); ?></p>

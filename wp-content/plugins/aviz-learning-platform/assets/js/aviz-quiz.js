@@ -15,6 +15,7 @@ jQuery(document).ready(function($) {
                 answers: formData
             },
             success: function(response) {
+                console.log('Raw response:', response);
                 if (response.success) {
                     var resultHtml = '<p>הציון שלך: ' + response.data.score + '%</p>';
                     if (typeof response.data.correct_answers !== 'undefined' && typeof response.data.total_questions !== 'undefined') {
@@ -29,6 +30,12 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error details:', {
+                    jqXHR: jqXHR,
+                    textStatus: textStatus,
+                    errorThrown: errorThrown
+                });
+                console.log('Response Text:', jqXHR.responseText);
                 console.error('AJAX error:', textStatus, errorThrown);
                 $('#aviz-quiz-result').html('אירעה שגיאה בשליחת המבחן');
             }

@@ -50,7 +50,7 @@ function aviz_register_post_types() {
             'new_item' => 'מבחן חדש',
             'view_item' => 'צפה במבחן',
             'search_items' => 'חפש מבחנים',
-            'not_found' => 'לא נמצאו מבחנים',
+            'not_found' => 'לא נמצא מבחנים',
             'not_found_in_trash' => 'לא נמצאו מבחנים בפח'
         ),
         'public' => true,
@@ -330,3 +330,159 @@ function aviz_save_viewed_status($post_id) {
     update_post_meta($post_id, '_aviz_viewed_status', $viewed_status);
 }
 add_action('save_post_aviz_content', 'aviz_save_viewed_status');
+
+// יצירת טבלת תוצאות מבחנים
+function aviz_create_quiz_results_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        quiz_id bigint(20) NOT NULL,
+        score float NOT NULL,
+        answers longtext NOT NULL,
+        completion_date datetime NOT NULL,
+        PRIMARY KEY  (id),
+        KEY user_id (user_id),
+        KEY quiz_id (quiz_id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+// הוסף את הפונקציה הזו לפונקציית ההפעלה של התוסף
+function aviz_plugin_activation() {
+    aviz_create_quiz_results_table();
+    aviz_check_and_update_quiz_results_table();
+}
+register_activation_hook(__FILE__, 'aviz_plugin_activation');
+
+// פונקציה לשמירת תוצאות מבחן
+function aviz_save_quiz_result($user_id, $quiz_id, $score, $answers) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    $wpdb->insert(
+        $table_name,
+        array(
+            'user_id' => $user_id,
+            'quiz_id' => $quiz_id,
+            'score' => $score,
+            'answers' => json_encode($answers),
+            'completion_date' => current_time('mysql')
+        ),
+        array('%d', '%d', '%f', '%s', '%s')
+    );
+
+    return $wpdb->insert_id;
+}
+
+// פונקציה לקבלת תוצאות מבחן של משתמש
+function aviz_get_user_quiz_results($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    return $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM $table_name WHERE user_id = %d AND quiz_id = %d ORDER BY completion_date DESC",
+        $user_id,
+        $quiz_id
+    ));
+}
+
+// פונקציה לבדיקה אם משתמש ביצע מבחן
+function aviz_user_completed_quiz($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    $result = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table_name WHERE user_id = %d AND quiz_id = %d",
+        $user_id,
+        $quiz_id
+    ));
+
+    return $result > 0;
+}
+
+// פונקציה למחיקת תוצאות מבחן של משתמש
+function aviz_delete_user_quiz_results($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    return $wpdb->delete(
+        $table_name,
+        array(
+            'user_id' => $user_id,
+            'quiz_id' => $quiz_id
+        ),
+        array('%d', '%d')
+    );
+}
+
+// פונקציה לבדיקה ועדכון מבנה הטבלה
+function aviz_check_and_update_quiz_results_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    // בדוק אם העמודה completion_date קיימת
+    $column = $wpdb->get_results($wpdb->prepare(
+        "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'completion_date'",
+        DB_NAME,
+        $table_name
+    ));
+
+    // אם העמודה לא קיימת, הוסף אותה
+    if (empty($column)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN completion_date datetime NOT NULL");
+    }
+}
+
+// בדוק ועדכן את מבנה הטבלה בעת הפעלת התוסף
+function aviz_plugin_update_check() {
+    if (get_option('aviz_quiz_db_version') != '1.1') {
+        aviz_check_and_update_quiz_results_table();
+        update_option('aviz_quiz_db_version', '1.1');
+    }
+}
+add_action('plugins_loaded', 'aviz_plugin_update_check');
+
+function aviz_get_user_last_quiz_score($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    $score = $wpdb->get_var($wpdb->prepare(
+        "SELECT score FROM $table_name WHERE user_id = %d AND quiz_id = %d ORDER BY completion_date DESC LIMIT 1",
+        $user_id,
+        $quiz_id
+    ));
+
+    return $score !== null ? floatval($score) : null;
+}
+
+function aviz_get_user_last_quiz_answers($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    $answers = $wpdb->get_var($wpdb->prepare(
+        "SELECT answers FROM $table_name WHERE user_id = %d AND quiz_id = %d ORDER BY completion_date DESC LIMIT 1",
+        $user_id,
+        $quiz_id
+    ));
+
+    return $answers ? json_decode($answers, true) : array();
+}
+
+function aviz_get_user_last_quiz_date($user_id, $quiz_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_quiz_results';
+
+    $completion_date = $wpdb->get_var($wpdb->prepare(
+        "SELECT completion_date FROM $table_name WHERE user_id = %d AND quiz_id = %d ORDER BY completion_date DESC LIMIT 1",
+        $user_id,
+        $quiz_id
+    ));
+
+    return $completion_date;
+}

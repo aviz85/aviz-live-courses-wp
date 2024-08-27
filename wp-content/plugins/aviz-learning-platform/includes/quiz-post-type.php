@@ -307,6 +307,23 @@ function aviz_submit_quiz() {
     $total_questions = count($questions);
     $score = ($total_questions > 0) ? ($correct_answers / $total_questions) * 100 : 0;
 
+    // Get existing attempts or initialize new array
+    $attempts = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts', true);
+    if (!is_array($attempts)) {
+        $attempts = array();
+    }
+
+    // Add new attempt
+    $attempts[] = array(
+        'date' => current_time('mysql'),
+        'score' => $score,
+        'answers' => $user_answers
+    );
+
+    // Update user meta with new attempts
+    update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts', $attempts);
+
+    // Update latest score for backwards compatibility
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completed', true);
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', $score);
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_answers', $user_answers);
@@ -340,7 +357,7 @@ function aviz_quiz_reports_page() {
     <div class="wrap">
         <h1>דוחות מבחנים</h1>
         <?php
-        // בדיקה אם נבחר מבחן ספציפי
+        // בדיקה אם נבחר מבחן סציפי
         $quiz_id = isset($_GET['quiz_id']) ? intval($_GET['quiz_id']) : 0;
         
         if ($quiz_id) {
@@ -392,6 +409,9 @@ function aviz_display_quiz_report($quiz_id) {
 
     echo '<h2>' . esc_html($quiz->post_title) . '</h2>';
 
+    // הוסף את הקריאה לפונקציית הלוג כאן
+    aviz_log_quiz_meta_counts($quiz_id);
+
     $participants = aviz_get_quiz_participants($quiz_id);
     if (empty($participants)) {
         echo '<p>אין משתתפים במבחן זה.</p>';
@@ -399,29 +419,66 @@ function aviz_display_quiz_report($quiz_id) {
     }
 
     echo '<table class="wp-list-table widefat fixed striped">';
-    echo '<thead><tr><th>שם משתמש</th><th>ציון</th><th>תאריך השלמה</th></tr></thead>';
+    echo '<thead><tr><th>שם משתמש</th><th>מספר ניסיונות</th><th>ציון אחרון</th><th>ציון הטוב ביותר</th><th>תאריך אחרון</th></tr></thead>';
     echo '<tbody>';
 
     foreach ($participants as $user_id) {
         $user = get_userdata($user_id);
-        $score = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', true);
-        $completion_date = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completion_date', true);
+        $attempts = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts', true);
+        
+        if (!is_array($attempts)) {
+            $attempts = array();
+        }
+
+        $last_attempt = end($attempts);
+        $best_score = 0;
+        foreach ($attempts as $attempt) {
+            if ($attempt['score'] > $best_score) {
+                $best_score = $attempt['score'];
+            }
+        }
 
         echo '<tr>';
         echo '<td>' . esc_html($user->display_name) . '</td>';
-        echo '<td>' . number_format($score, 2) . '%</td>';
-        echo '<td>' . ($completion_date ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $completion_date) : 'לא זמין') . '</td>';
+        echo '<td>' . count($attempts) . '</td>';
+        echo '<td>' . (isset($last_attempt['score']) ? number_format($last_attempt['score'], 2) : 'N/A') . '%</td>';
+        echo '<td>' . number_format($best_score, 2) . '%</td>';
+        echo '<td>' . (isset($last_attempt['date']) ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($last_attempt['date'])) : 'N/A') . '</td>';
         echo '</tr>';
     }
 
     echo '</tbody></table>';
+
+    // Add detailed view for each user
+    foreach ($participants as $user_id) {
+        $user = get_userdata($user_id);
+        $attempts = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts', true);
+
+        if (!is_array($attempts)) {
+            continue;
+        }
+
+        echo '<h3>פירוט ניסיונות: ' . esc_html($user->display_name) . '</h3>';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>תאריך</th><th>ציון</th></tr></thead>';
+        echo '<tbody>';
+
+        foreach ($attempts as $attempt) {
+            echo '<tr>';
+            echo '<td>' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($attempt['date'])) . '</td>';
+            echo '<td>' . number_format($attempt['score'], 2) . '%</td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody></table>';
+    }
 }
 
 function aviz_get_quiz_participants($quiz_id) {
     global $wpdb;
-    $meta_key = 'aviz_quiz_' . $quiz_id . '_completed';
+    $meta_key = 'aviz_quiz_' . $quiz_id . '_attempts';
     return $wpdb->get_col($wpdb->prepare(
-        "SELECT DISTINCT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value = '1'",
+        "SELECT DISTINCT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s",
         $meta_key
     ));
 }
@@ -434,8 +491,11 @@ function aviz_get_quiz_average_score($quiz_id) {
 
     $total_score = 0;
     foreach ($participants as $user_id) {
-        $score = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', true);
-        $total_score += floatval($score);
+        $attempts = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts', true);
+        if (is_array($attempts)) {
+            $last_attempt = end($attempts);
+            $total_score += floatval($last_attempt['score']);
+        }
     }
 
     return $total_score / count($participants);
@@ -462,7 +522,36 @@ function aviz_reset_quiz() {
     delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completed');
     delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score');
     delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_answers');
+    delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_attempts');
+    delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completion_date');
 
     wp_send_json_success(array('message' => 'המבחן אופס בהצלחה'));
 }
 add_action('wp_ajax_aviz_reset_quiz', 'aviz_reset_quiz');
+
+// הוסף את הפונקציה הזו בסוף הקובץ
+
+function aviz_log_quiz_meta_counts($quiz_id) {
+    global $wpdb;
+    
+    $meta_keys = array(
+        'aviz_quiz_' . $quiz_id . '_completed',
+        'aviz_quiz_' . $quiz_id . '_score',
+        'aviz_quiz_' . $quiz_id . '_answers',
+        'aviz_quiz_' . $quiz_id . '_attempts'
+    );
+    
+    echo '<h3>לוג מספר רשומות מטא-דאטה:</h3>';
+    echo '<ul>';
+    
+    foreach ($meta_keys as $meta_key) {
+        $count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = %s",
+            $meta_key
+        ));
+        
+        echo '<li>' . esc_html($meta_key) . ': ' . intval($count) . ' רשומות</li>';
+    }
+    
+    echo '</ul>';
+}

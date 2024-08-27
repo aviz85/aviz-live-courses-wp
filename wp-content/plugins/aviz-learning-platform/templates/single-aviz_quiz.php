@@ -7,9 +7,11 @@ while (have_posts()) :
     $time_limit = get_post_meta($quiz_id, '_aviz_quiz_time_limit', true);
     $show_correct_answers = get_post_meta(get_the_ID(), '_aviz_quiz_show_correct_answers', true);
     $user_id = get_current_user_id();
-    $quiz_completed = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_completed', true);
-    $quiz_score = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_score', true);
-    $user_answers = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_answers', true);
+    $attempts = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_attempts', true);
+    $quiz_completed = !empty($attempts);
+    $last_attempt = $quiz_completed ? end($attempts) : null;
+    $quiz_score = $last_attempt ? $last_attempt['score'] : 0;
+    $user_answers = $last_attempt ? $last_attempt['answers'] : array();
     ?>
 
     <div class="aviz-quiz-container">
@@ -20,9 +22,10 @@ while (have_posts()) :
         $time_limit = get_post_meta(get_the_ID(), '_aviz_quiz_time_limit', true);
         $show_correct_answers = get_post_meta(get_the_ID(), '_aviz_quiz_show_correct_answers', true);
         $user_id = get_current_user_id();
-        $quiz_completed = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_completed', true);
-        $quiz_score = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_score', true);
-        $user_answers = get_user_meta($user_id, 'aviz_quiz_' . get_the_ID() . '_answers', true);
+        $quiz_completed = !empty($attempts);
+        $last_attempt = $quiz_completed ? end($attempts) : null;
+        $quiz_score = $last_attempt ? $last_attempt['score'] : 0;
+        $user_answers = $last_attempt ? $last_attempt['answers'] : array();
         ?>
 
         <?php if (!$quiz_completed) : ?>
@@ -43,8 +46,9 @@ while (have_posts()) :
             </form>
         <?php else : ?>
             <div id="aviz-quiz-result">
-                <h2>תוצאות המבחן</h2>
+                <h2>תוצאות המבחן האחרון</h2>
                 <p>הציון שלך: <?php echo number_format($quiz_score, 2); ?>%</p>
+                <p>תאריך: <?php echo date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($last_attempt['date'])); ?></p>
             </div>
 
             <button id="retake-quiz" class="aviz-quiz-button">בצע את המבחן מחדש</button>

@@ -298,7 +298,7 @@ function aviz_submit_quiz() {
             $selected_answer = intval($value);
             $user_answers[$question_index] = $selected_answer;
 
-            if (isset($questions[$question_index]) && $questions[$question_index]['correct_answer'] === $selected_answer) {
+            if (isset($questions[$question_index]) && intval($questions[$question_index]['correct_answer']) === $selected_answer) {
                 $correct_answers++;
             }
         }
@@ -310,13 +310,159 @@ function aviz_submit_quiz() {
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completed', true);
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', $score);
     update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_answers', $user_answers);
+    update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completion_date', current_time('timestamp'));
 
     $show_correct_answers = get_post_meta($quiz_id, '_aviz_quiz_show_correct_answers', true);
 
     wp_send_json_success(array(
         'score' => round($score, 2),
-        'show_correct_answers' => $show_correct_answers === '1'
+        'show_correct_answers' => $show_correct_answers === '1',
+        'correct_answers' => $correct_answers,
+        'total_questions' => $total_questions
     ));
 }
 add_action('wp_ajax_aviz_submit_quiz', 'aviz_submit_quiz');
-add_action('wp_ajax_nopriv_aviz_submit_quiz', 'aviz_submit_quiz');
+
+function aviz_add_quiz_reports_page() {
+    add_submenu_page(
+        'edit.php?post_type=aviz_quiz',
+        'דוחות מבחנים',
+        'דוחות',
+        'manage_options',
+        'aviz-quiz-reports',
+        'aviz_quiz_reports_page'
+    );
+}
+add_action('admin_menu', 'aviz_add_quiz_reports_page');
+
+function aviz_quiz_reports_page() {
+    ?>
+    <div class="wrap">
+        <h1>דוחות מבחנים</h1>
+        <?php
+        // בדיקה אם נבחר מבחן ספציפי
+        $quiz_id = isset($_GET['quiz_id']) ? intval($_GET['quiz_id']) : 0;
+        
+        if ($quiz_id) {
+            aviz_display_quiz_report($quiz_id);
+        } else {
+            aviz_display_quizzes_list();
+        }
+        ?>
+    </div>
+    <?php
+}
+
+function aviz_display_quizzes_list() {
+    $quizzes = get_posts(array(
+        'post_type' => 'aviz_quiz',
+        'numberposts' => -1
+    ));
+
+    if (empty($quizzes)) {
+        echo '<p>אין מבחנים זמינים.</p>';
+        return;
+    }
+
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead><tr><th>שם המבחן</th><th>מספר משתתפים</th><th>ציון ממוצע</th><th>פעולות</th></tr></thead>';
+    echo '<tbody>';
+
+    foreach ($quizzes as $quiz) {
+        $participants = aviz_get_quiz_participants($quiz->ID);
+        $average_score = aviz_get_quiz_average_score($quiz->ID);
+
+        echo '<tr>';
+        echo '<td>' . esc_html($quiz->post_title) . '</td>';
+        echo '<td>' . count($participants) . '</td>';
+        echo '<td>' . number_format($average_score, 2) . '%</td>';
+        echo '<td><a href="' . admin_url('edit.php?post_type=aviz_quiz&page=aviz-quiz-reports&quiz_id=' . $quiz->ID) . '">צפה בדוח מפורט</a></td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
+}
+
+function aviz_display_quiz_report($quiz_id) {
+    $quiz = get_post($quiz_id);
+    if (!$quiz || $quiz->post_type !== 'aviz_quiz') {
+        echo '<p>מבחן לא נמצא.</p>';
+        return;
+    }
+
+    echo '<h2>' . esc_html($quiz->post_title) . '</h2>';
+
+    $participants = aviz_get_quiz_participants($quiz_id);
+    if (empty($participants)) {
+        echo '<p>אין משתתפים במבחן זה.</p>';
+        return;
+    }
+
+    echo '<table class="wp-list-table widefat fixed striped">';
+    echo '<thead><tr><th>שם משתמש</th><th>ציון</th><th>תאריך השלמה</th></tr></thead>';
+    echo '<tbody>';
+
+    foreach ($participants as $user_id) {
+        $user = get_userdata($user_id);
+        $score = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', true);
+        $completion_date = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completion_date', true);
+
+        echo '<tr>';
+        echo '<td>' . esc_html($user->display_name) . '</td>';
+        echo '<td>' . number_format($score, 2) . '%</td>';
+        echo '<td>' . ($completion_date ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $completion_date) : 'לא זמין') . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
+}
+
+function aviz_get_quiz_participants($quiz_id) {
+    global $wpdb;
+    $meta_key = 'aviz_quiz_' . $quiz_id . '_completed';
+    return $wpdb->get_col($wpdb->prepare(
+        "SELECT DISTINCT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value = '1'",
+        $meta_key
+    ));
+}
+
+function aviz_get_quiz_average_score($quiz_id) {
+    $participants = aviz_get_quiz_participants($quiz_id);
+    if (empty($participants)) {
+        return 0;
+    }
+
+    $total_score = 0;
+    foreach ($participants as $user_id) {
+        $score = get_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', true);
+        $total_score += floatval($score);
+    }
+
+    return $total_score / count($participants);
+}
+
+function aviz_enqueue_admin_styles($hook) {
+    if ('aviz_quiz_page_aviz-quiz-reports' === $hook) {
+        wp_enqueue_style('aviz-admin-style', plugins_url('assets/css/admin-style.css', dirname(__FILE__)));
+    }
+}
+add_action('admin_enqueue_scripts', 'aviz_enqueue_admin_styles');
+
+function aviz_reset_quiz() {
+    check_ajax_referer('aviz_quiz_nonce', 'nonce');
+
+    $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
+    $user_id = get_current_user_id();
+
+    if (!$quiz_id || !$user_id) {
+        wp_send_json_error(array('message' => 'נתונים חסרים'));
+    }
+
+    // מחיקת המטא-דאטה של המבחן עבור המשתמש
+    delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completed');
+    delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score');
+    delete_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_answers');
+
+    wp_send_json_success(array('message' => 'המבחן אופס בהצלחה'));
+}
+add_action('wp_ajax_aviz_reset_quiz', 'aviz_reset_quiz');

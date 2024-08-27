@@ -1,0 +1,51 @@
+.aviz-quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.aviz-quiz-question {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.aviz-quiz-question h3 {
+    color: #333;
+    margin-top: 0;
+}
+
+.aviz-quiz-question label {
+    display: block;
+    margin: 10px 0;
+}
+
+.aviz-quiz-submit {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.aviz-quiz-submit:hover {
+    background-color: #45a049;
+}
+
+#aviz-quiz-timer {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    text-align: center;
+}
+
+#aviz-quiz-result {
+    margin-top: 20px;
+    font-weight: bold;
+    text-align: center;
+}

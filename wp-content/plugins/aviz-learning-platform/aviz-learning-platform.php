@@ -19,6 +19,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/ajax-handlers.php';
 require_once plugin_dir_path(__FILE__) . 'includes/bulk-user-registration.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-access-control.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-ajax-handler.php';
+require_once plugin_dir_path(__FILE__) . 'includes/quiz-post-type.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'aviz_learning_platform_activate');
@@ -60,6 +61,17 @@ function aviz_load_content_template($template) {
     return $template;
 }
 add_filter('single_template', 'aviz_load_content_template');
+
+function aviz_register_quiz_template($single_template) {
+    global $post;
+
+    if ($post->post_type === 'aviz_quiz') {
+        $single_template = plugin_dir_path(__FILE__) . 'templates/single-aviz_quiz.php';
+    }
+
+    return $single_template;
+}
+add_filter('single_template', 'aviz_register_quiz_template');
 
 function aviz_set_default_user_meta($user_id) {
     $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);

@@ -38,6 +38,27 @@ function aviz_register_post_types() {
         'menu_icon' => 'dashicons-welcome-learn-more',
         'supports' => array('title', 'editor', 'thumbnail', 'comments'),
     ));
+
+    // Register Quiz post type
+    register_post_type('aviz_quiz', array(
+        'labels' => array(
+            'name' => 'מבחנים',
+            'singular_name' => 'מבחן',
+            'add_new' => 'הוסף מבחן חדש',
+            'add_new_item' => 'הוסף מבחן חדש',
+            'edit_item' => 'ערוך מבחן',
+            'new_item' => 'מבחן חדש',
+            'view_item' => 'צפה במבחן',
+            'search_items' => 'חפש מבחנים',
+            'not_found' => 'לא נמצאו מבחנים',
+            'not_found_in_trash' => 'לא נמצאו מבחנים בפח'
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'menu_icon' => 'dashicons-clipboard',
+        'supports' => array('title', 'editor', 'thumbnail'),
+        'rewrite' => array('slug' => 'quiz'),
+    ));
 }
 add_action('init', 'aviz_register_post_types');
 

@@ -1,32 +1,8 @@
 jQuery(document).ready(function($) {
-    var quizForm = $('#aviz-quiz-form');
-    var quizTimer = $('#aviz-quiz-timer span');
-    var timeLimit = quizTimer.length ? parseInt(quizTimer.text()) : 0;
-    var timerInterval;
-
-    if (timeLimit > 0) {
-        startTimer();
-    }
-
-    function startTimer() {
-        timerInterval = setInterval(function() {
-            timeLimit--;
-            var minutes = Math.floor(timeLimit / 60);
-            var seconds = timeLimit % 60;
-            quizTimer.text(minutes + ':' + (seconds < 10 ? '0' : '') + seconds);
-
-            if (timeLimit <= 0) {
-                clearInterval(timerInterval);
-                quizForm.submit();
-            }
-        }, 1000);
-    }
-
-    quizForm.on('submit', function(e) {
+    $('#aviz-quiz-form').on('submit', function(e) {
         e.preventDefault();
-        clearInterval(timerInterval);
 
-        var formData = $(this).serializeArray();
+        var formData = $(this).serialize();
         var quizId = $(this).data('quiz-id');
 
         $.ajax({
@@ -40,8 +16,13 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    $('#aviz-quiz-result').html('הציון שלך: ' + response.data.score + '%');
-                    quizForm.hide();
+                    var resultHtml = '<p>הציון שלך: ' + response.data.score + '%</p>';
+                    if (typeof response.data.correct_answers !== 'undefined' && typeof response.data.total_questions !== 'undefined') {
+                        resultHtml += '<p>תשובות נכונות: ' + response.data.correct_answers + ' מתוך ' + response.data.total_questions + '</p>';
+                    }
+                    $('#aviz-quiz-result').html(resultHtml);
+                    $('#aviz-quiz-form').hide();
+                    console.log('Quiz submission response:', response); // For debugging
                 } else {
                     console.error('Server error:', response);
                     $('#aviz-quiz-result').html('אירעה שגיאה: ' + (response.data ? response.data.message : 'שגיאה לא ידועה'));
@@ -53,4 +34,36 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    var $questionsContainer = $('#aviz-quiz-questions');
+    var questionTemplate = $('#question-template').html();
+
+    $('#add-question').on('click', function() {
+        var index = $questionsContainer.children().length;
+        var newQuestion = questionTemplate.replace(/\{\{INDEX\}\}/g, index);
+        $questionsContainer.append(newQuestion);
+        updateQuestionNumbers();
+    });
+
+    $questionsContainer.on('click', '.remove-question', function() {
+        $(this).closest('.question').remove();
+        updateQuestionNumbers();
+    });
+
+    function updateQuestionNumbers() {
+        $('.question').each(function(index) {
+            $(this).find('h3').text('שאלה ' + (index + 1));
+            $(this).attr('data-index', index);
+            $(this).find('input, textarea, select').each(function() {
+                var name = $(this).attr('name');
+                if (name) {
+                    $(this).attr('name', name.replace(/\[\d+\]/, '[' + index + ']'));
+                }
+                var id = $(this).attr('id');
+                if (id) {
+                    $(this).attr('id', id.replace(/\_\d+\_/, '_' + index + '_'));
+                }
+            });
+        });
+    }
 });

@@ -67,6 +67,8 @@ function aviz_quiz_details_callback($post) {
     $quiz_order = get_post_meta($post->ID, '_aviz_quiz_order', true);
     $passing_grade = get_post_meta($post->ID, '_aviz_quiz_passing_grade', true);
     $time_limit = get_post_meta($post->ID, '_aviz_quiz_time_limit', true);
+    $allow_retake = get_post_meta($post->ID, '_aviz_quiz_allow_retake', true);
+    $show_correct_answers = get_post_meta($post->ID, '_aviz_quiz_show_correct_answers', true);
 
     $courses = get_posts(array('post_type' => 'aviz_course', 'numberposts' => -1));
 
@@ -101,26 +103,39 @@ function aviz_quiz_details_callback($post) {
         <input type="number" name="aviz_quiz_time_limit" id="aviz_quiz_time_limit" value="<?php echo esc_attr($time_limit); ?>" min="0" style="width: 100%;">
         <small>0 ללא הגבלה</small>
     </p>
+    <p>
+        <label for="aviz_quiz_allow_retake">
+            <input type="checkbox" name="aviz_quiz_allow_retake" id="aviz_quiz_allow_retake" value="1" <?php checked($allow_retake, '1'); ?>>
+            מותר לעשות את המבחן יותר מפעם אחת
+        </label>
+    </p>
+    <p>
+        <label for="aviz_quiz_show_correct_answers">
+            <input type="checkbox" name="aviz_quiz_show_correct_answers" id="aviz_quiz_show_correct_answers" value="1" <?php checked($show_correct_answers, '1'); ?>>
+            הצג תשובות נכונות בסוף המבחן
+        </label>
+    </p>
     <?php
 }
 
 function aviz_quiz_questions_callback($post) {
     wp_nonce_field('aviz_save_quiz_questions', 'aviz_quiz_questions_nonce');
+
     $questions = get_post_meta($post->ID, '_aviz_quiz_questions', true);
-    if (!is_array($questions)) {
-        $questions = array();
-    }
     ?>
     <div id="aviz-quiz-questions">
         <?php
-        foreach ($questions as $index => $question) {
-            aviz_render_question_fields($index, $question);
+        if (!empty($questions)) {
+            foreach ($questions as $index => $question) {
+                aviz_render_question_fields($index, $question);
+            }
         }
         ?>
     </div>
     <button type="button" id="add-question" class="button">הוסף שאלה</button>
+
     <script type="text/template" id="question-template">
-        <?php aviz_render_question_fields('{{INDEX}}', array()); ?>
+        <?php aviz_render_question_fields('{{INDEX}}'); ?>
     </script>
     <?php
 }
@@ -129,11 +144,12 @@ function aviz_render_question_fields($index, $question = array()) {
     $question = wp_parse_args($question, array(
         'text' => '',
         'answers' => array('', '', '', ''),
-        'correct_answer' => 0
+        'correct_answer' => 0,
+        'explanation' => ''
     ));
     ?>
     <div class="question" data-index="<?php echo esc_attr($index); ?>">
-        <h3>שאלה <?php echo esc_html(is_numeric($index) ? $index + 1 : $index); ?></h3>
+        <h3>שאלה <?php echo esc_html(is_numeric($index) ? (intval($index) + 1) : $index); ?></h3>
         <p>
             <label for="question_text_<?php echo esc_attr($index); ?>">תוכן השאלה:</label>
             <textarea name="aviz_quiz_questions[<?php echo esc_attr($index); ?>][text]" id="question_text_<?php echo esc_attr($index); ?>" rows="3" cols="50"><?php echo esc_textarea($question['text']); ?></textarea>
@@ -148,6 +164,10 @@ function aviz_render_question_fields($index, $question = array()) {
                 </label>
             </p>
         <?php endfor; ?>
+        <p>
+            <label for="question_explanation_<?php echo esc_attr($index); ?>">הסבר על התשובה הנכונה:</label>
+            <textarea name="aviz_quiz_questions[<?php echo esc_attr($index); ?>][explanation]" id="question_explanation_<?php echo esc_attr($index); ?>" rows="3" cols="50"><?php echo esc_textarea($question['explanation']); ?></textarea>
+        </p>
         <button type="button" class="button remove-question">הסר שאלה</button>
     </div>
     <?php
@@ -176,12 +196,17 @@ function aviz_save_quiz_meta($post_id) {
         'aviz_quiz_chapter',
         'aviz_quiz_order',
         'aviz_quiz_passing_grade',
-        'aviz_quiz_time_limit'
+        'aviz_quiz_time_limit',
+        'aviz_quiz_allow_retake',
+        'aviz_quiz_show_correct_answers'
     );
 
     foreach ($fields as $field) {
         if (isset($_POST[$field])) {
-            update_post_meta($post_id, '_' . $field, sanitize_text_field($_POST[$field]));
+            $value = ($field === 'aviz_quiz_allow_retake' || $field === 'aviz_quiz_show_correct_answers') ? 
+                     (isset($_POST[$field]) ? '1' : '0') : 
+                     sanitize_text_field($_POST[$field]);
+            update_post_meta($post_id, '_' . $field, $value);
         }
     }
 
@@ -192,7 +217,8 @@ function aviz_save_quiz_meta($post_id) {
             $questions[] = array(
                 'text' => sanitize_textarea_field($question_data['text']),
                 'answers' => array_map('sanitize_text_field', $question_data['answers']),
-                'correct_answer' => intval($question_data['correct_answer'])
+                'correct_answer' => intval($question_data['correct_answer']),
+                'explanation' => sanitize_textarea_field($question_data['explanation'])
             );
         }
         update_post_meta($post_id, '_aviz_quiz_questions', $questions);
@@ -255,42 +281,42 @@ function aviz_submit_quiz() {
     check_ajax_referer('aviz_quiz_nonce', 'nonce');
 
     $quiz_id = isset($_POST['quiz_id']) ? intval($_POST['quiz_id']) : 0;
-    $answers = isset($_POST['answers']) ? $_POST['answers'] : array();
+    $answers = isset($_POST['answers']) ? wp_parse_args($_POST['answers']) : array();
+    $user_id = get_current_user_id();
 
-    if (!$quiz_id || empty($answers)) {
+    if (!$quiz_id || empty($answers) || !$user_id) {
         wp_send_json_error(array('message' => 'נתונים חסרים'));
     }
 
     $questions = get_post_meta($quiz_id, '_aviz_quiz_questions', true);
     $correct_answers = 0;
-    $total_questions = count($questions);
+    $user_answers = array();
 
-    foreach ($answers as $answer) {
-        $question_index = str_replace('question_', '', $answer['name']);
-        $selected_answer = intval($answer['value']);
+    foreach ($answers as $key => $value) {
+        if (strpos($key, 'question_') === 0) {
+            $question_index = substr($key, 9);
+            $selected_answer = intval($value);
+            $user_answers[$question_index] = $selected_answer;
 
-        if (isset($questions[$question_index]) && $questions[$question_index]['correct_answer'] === $selected_answer) {
-            $correct_answers++;
+            if (isset($questions[$question_index]) && $questions[$question_index]['correct_answer'] === $selected_answer) {
+                $correct_answers++;
+            }
         }
     }
 
-    $score = ($correct_answers / $total_questions) * 100;
+    $total_questions = count($questions);
+    $score = ($total_questions > 0) ? ($correct_answers / $total_questions) * 100 : 0;
 
-    // Save quiz results to database
-    $result_id = wp_insert_post(array(
-        'post_type' => 'aviz_quiz_result',
-        'post_title' => 'תוצאת מבחן - ' . get_the_title($quiz_id),
-        'post_status' => 'publish',
-        'post_author' => get_current_user_id()
+    update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_completed', true);
+    update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_score', $score);
+    update_user_meta($user_id, 'aviz_quiz_' . $quiz_id . '_answers', $user_answers);
+
+    $show_correct_answers = get_post_meta($quiz_id, '_aviz_quiz_show_correct_answers', true);
+
+    wp_send_json_success(array(
+        'score' => round($score, 2),
+        'show_correct_answers' => $show_correct_answers === '1'
     ));
-
-    if ($result_id) {
-        update_post_meta($result_id, '_aviz_quiz_id', $quiz_id);
-        update_post_meta($result_id, '_aviz_quiz_score', $score);
-        update_post_meta($result_id, '_aviz_quiz_answers', $answers);
-    }
-
-    wp_send_json_success(array('score' => round($score, 2)));
 }
 add_action('wp_ajax_aviz_submit_quiz', 'aviz_submit_quiz');
 add_action('wp_ajax_nopriv_aviz_submit_quiz', 'aviz_submit_quiz');

@@ -69,19 +69,57 @@ if (!function_exists('aviz_get_course_contents')) {
 }
 
 function aviz_track_content_view($post_id) {
-    if (!is_user_logged_in() || get_post_type($post_id) !== 'aviz_content') return;
-
-    $user_id = get_current_user_id();
-    $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
-    if (!is_array($viewed_content)) $viewed_content = array();
-
-    if (!in_array($post_id, $viewed_content)) {
-        $viewed_content[] = $post_id;
-        update_user_meta($user_id, 'aviz_viewed_content', $viewed_content);
-    }
+    // Remove the automatic tracking logic
+    // This function can remain empty or be removed entirely
 }
-add_action('wp_head', function() {
+
+// Remove the automatic tracking action
+remove_action('wp_head', function() {
     if (is_single() && get_post_type() === 'aviz_content') {
         aviz_track_content_view(get_the_ID());
     }
 });
+
+// Add the new tracking function to the content
+add_filter('the_content', function($content) {
+    ob_start();
+    aviz_track_content_view(get_the_ID());
+    $button = ob_get_clean();
+    return $content . $button;
+});
+
+// Add an AJAX handler for marking content as viewed
+add_action('wp_ajax_aviz_mark_content_completed', 'aviz_mark_content_completed_ajax');
+function aviz_mark_content_completed_ajax() {
+    check_ajax_referer('aviz_content_nonce', 'nonce');
+
+    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    $user_id = get_current_user_id();
+
+    if ($post_id && $user_id) {
+        $viewed_content = get_user_meta($user_id, 'aviz_viewed_content', true);
+        if (!is_array($viewed_content)) $viewed_content = array();
+
+        if (!in_array($post_id, $viewed_content)) {
+            $viewed_content[] = $post_id;
+            update_user_meta($user_id, 'aviz_viewed_content', $viewed_content);
+            wp_send_json_success(array('message' => 'התוכן סומן כהושלם'));
+        } else {
+            wp_send_json_error(array('message' => 'התוכן כבר סומן כהושלם'));
+        }
+    } else {
+        wp_send_json_error(array('message' => 'שגיאה בעיבוד הבקשה'));
+    }
+}
+
+// Enqueue the JavaScript for handling the button click
+function aviz_enqueue_content_scripts() {
+    if (is_single() && get_post_type() === 'aviz_content') {
+        wp_enqueue_script('aviz-content-completion', plugin_dir_url(__FILE__) . '../assets/js/content-completion.js', array('jquery'), '1.0', true);
+        wp_localize_script('aviz-content-completion', 'aviz_content', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('aviz_content_nonce')
+        ));
+    }
+}
+add_action('wp_enqueue_scripts', 'aviz_enqueue_content_scripts');

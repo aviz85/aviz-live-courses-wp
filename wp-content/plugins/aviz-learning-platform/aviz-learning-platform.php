@@ -20,12 +20,16 @@ require_once plugin_dir_path(__FILE__) . 'includes/bulk-user-registration.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-access-control.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-aviz-ajax-handler.php';
 require_once plugin_dir_path(__FILE__) . 'includes/quiz-post-type.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/file-upload-meta-box.php';
+require_once plugin_dir_path(__FILE__) . 'includes/file-upload-handler.php';
+require_once plugin_dir_path(__FILE__) . 'includes/admin/admin-file-management.php';
 
 // Activation hook
 register_activation_hook(__FILE__, 'aviz_learning_platform_activate');
 
 function aviz_learning_platform_activate() {
-    // Activation tasks (if any)
+    aviz_create_uploaded_files_table();
+    aviz_secure_upload_directory();
 }
 
 // Deactivation hook
@@ -120,3 +124,43 @@ function aviz_template_include($template) {
     return $template;
 }
 add_filter('template_include', 'aviz_template_include');
+
+function aviz_create_uploaded_files_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'aviz_uploaded_files';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        content_id bigint(20) NOT NULL,
+        original_filename varchar(255) NOT NULL,
+        stored_filename varchar(255) NOT NULL,
+        upload_date datetime NOT NULL,
+        PRIMARY KEY  (id),
+        UNIQUE KEY user_content (user_id, content_id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+function aviz_secure_upload_directory() {
+    $upload_dir = wp_upload_dir();
+    $aviz_upload_dir = $upload_dir['basedir'] . '/aviz_uploads';
+
+    if (!file_exists($aviz_upload_dir)) {
+        wp_mkdir_p($aviz_upload_dir);
+    }
+
+    $htaccess_file = $aviz_upload_dir . '/.htaccess';
+    if (!file_exists($htaccess_file)) {
+        $htaccess_content = "Order Deny,Allow\nDeny from all";
+        file_put_contents($htaccess_file, $htaccess_content);
+    }
+
+    $index_file = $aviz_upload_dir . '/index.php';
+    if (!file_exists($index_file)) {
+        file_put_contents($index_file, '<?php // Silence is golden');
+    }
+}

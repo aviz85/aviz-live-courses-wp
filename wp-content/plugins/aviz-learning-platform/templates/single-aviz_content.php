@@ -47,6 +47,96 @@ while ( have_posts() ) :
                 <?php the_content(); ?>
             </div>
 
+            <?php
+$enable_file_upload = get_post_meta(get_the_ID(), '_aviz_enable_file_upload', true);
+$existing_file = null;
+
+if ($enable_file_upload === '1' && is_user_logged_in()) :
+    $user_id = get_current_user_id();
+    $content_id = get_the_ID();
+    $existing_file = aviz_get_user_uploaded_file($user_id, $content_id);
+?>
+    <div class="aviz-file-upload-form">
+        <h3>העלאת קובץ</h3>
+        <?php if ($existing_file) : ?>
+            <p>קובץ קיים: <?php echo esc_html($existing_file['original_filename']); ?></p>
+        <?php endif; ?>
+        <form id="aviz-file-upload-form" enctype="multipart/form-data">
+            <input type="file" name="aviz_file_upload" id="aviz-file-upload" accept=".pdf,.doc,.docx,.txt">
+            <input type="hidden" name="action" value="aviz_handle_file_upload">
+            <input type="hidden" name="content_id" value="<?php echo $content_id; ?>">
+            <?php wp_nonce_field('aviz_file_upload', 'aviz_file_upload_nonce'); ?>
+            <button type="submit">העלה קובץ</button>
+        </form>
+        <p id="aviz-file-upload-message"></p>
+    </div>
+    <script>
+    jQuery(document).ready(function($) {
+        $('#aviz-file-upload-form').on('submit', function(e) {
+            e.preventDefault();
+            var fileInput = $('#aviz-file-upload')[0];
+            if (fileInput.files.length === 0) {
+                $('#aviz-file-upload-message').text('אנא בחר קובץ להעלאה.');
+                return;
+            }
+            if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                $('#aviz-file-upload-message').text('הקובץ גדול מדי. הגודל המקסימלי הוא 5MB.');
+                return;
+            }
+            var formData = new FormData(this);
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.success) {
+                        $('#aviz-file-upload-message').text('הקובץ הועלה בהצלחה.');
+                        location.reload();
+                    } else {
+                        $('#aviz-file-upload-message').text('שגיאה בהעלאת הקובץ: ' + response.data);
+                    }
+                }
+            });
+        });
+    });
+    </script>
+<?php endif; ?>
+
+<?php if ($existing_file) : ?>
+    <form id="aviz-file-delete-form">
+        <input type="hidden" name="action" value="aviz_handle_file_delete">
+        <input type="hidden" name="content_id" value="<?php echo $content_id; ?>">
+        <?php wp_nonce_field('aviz_file_delete', 'aviz_file_delete_nonce'); ?>
+        <button type="submit">מחק קובץ</button>
+    </form>
+<?php endif; ?>
+
+<script>
+jQuery(document).ready(function($) {
+    $('#aviz-file-delete-form').on('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#aviz-file-upload-message').text('הקובץ נמחק בהצלחה.');
+                    location.reload();
+                } else {
+                    $('#aviz-file-upload-message').text('שגיאה במחיקת הקובץ: ' + response.data);
+                }
+            }
+        });
+    });
+});
+</script>
+
             <footer class="entry-footer">
                 <div class="aviz-content-navigation">
                     <?php if ($prev_content): ?>

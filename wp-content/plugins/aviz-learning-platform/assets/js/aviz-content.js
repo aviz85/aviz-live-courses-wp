@@ -16,32 +16,36 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    if (isCompleted) {
-                        button.removeClass('aviz-completed');
-                        button.text('סמן כהושלם');
-                        $('.aviz-next-content').addClass('aviz-disabled');
-                    } else {
+                    if (!isCompleted) {
+                        // Content is now completed
                         button.addClass('aviz-completed');
                         button.text('הושלם ✓');
                         $('.aviz-next-content').removeClass('aviz-disabled');
+                    } else {
+                        // Content is now uncompleted
+                        button.removeClass('aviz-completed');
+                        button.text('סמן כהושלם');
+                        $('.aviz-next-content').addClass('aviz-disabled');
                     }
+                } else {
+                    console.error('Error updating content status:', response.data);
                 }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX error:', textStatus, errorThrown);
             }
         });
     });
 
-    $('.aviz-next-content.aviz-disabled').on('click', function(e) {
+    // Remove the click event from disabled next content button
+    $(document).on('click', '.aviz-next-content.aviz-disabled', function(e) {
         e.preventDefault();
         alert('יש לסמן את התוכן הנוכחי כהושלם לפני המעבר לתוכן הבא.');
     });
-
-    // Smooth scroll to anchor
-    if (window.location.hash) {
-        var target = $(window.location.hash);
-        if (target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 100 // Adjust the offset as needed
-            }, 1000);
-        }
-    }
 });
+
+function updateProgressBar(progress) {
+    // Implement this function to update your progress bar
+    // For example:
+    // $('.progress-bar').css('width', progress + '%');
+}

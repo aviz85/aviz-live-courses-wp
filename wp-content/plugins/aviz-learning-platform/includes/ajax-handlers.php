@@ -59,8 +59,14 @@ function aviz_toggle_content_complete() {
         $viewed_content = array_diff($viewed_content, array($content_id));
     }
 
-    update_user_meta($user_id, 'aviz_viewed_content', $viewed_content);
+    $update_result = update_user_meta($user_id, 'aviz_viewed_content', $viewed_content);
 
-    wp_send_json_success();
+    if ($update_result === false) {
+        wp_send_json_error('Failed to update user meta');
+    }
+
+    wp_send_json_success(array(
+        'is_completed' => $is_completed
+    ));
 }
 add_action('wp_ajax_aviz_toggle_content_complete', 'aviz_toggle_content_complete');

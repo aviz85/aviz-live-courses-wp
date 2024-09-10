@@ -141,11 +141,11 @@ jQuery(document).ready(function($) {
                 <div class="aviz-content-navigation">
                     <?php if ($prev_content): ?>
                         <a href="<?php echo get_permalink($prev_content->ID); ?>" class="aviz-button aviz-prev-content">
-                            <span class="aviz-nav-icon">&larr;</span> התוכן הקודם
+                            <span class="aviz-nav-icon">&rarr;</span> התוכן הקודם
                         </a>
                     <?php else: ?>
                         <a href="<?php echo get_permalink($course_id); ?>" class="aviz-button aviz-back-to-course">
-                            <span class="aviz-nav-icon">&larr;</span> חזרה לקורס
+                            <span class="aviz-nav-icon">&rarr;</span> חזרה לקורס
                         </a>
                     <?php endif; ?>
 
@@ -155,7 +155,7 @@ jQuery(document).ready(function($) {
 
                     <?php if ($next_content): ?>
                         <a href="<?php echo get_permalink($next_content->ID); ?>" class="aviz-button aviz-next-content <?php echo !$is_viewed ? 'aviz-disabled' : ''; ?>">
-                            התוכן הבא <span class="aviz-nav-icon">&rarr;</span>
+                            התוכן הבא <span class="aviz-nav-icon">&larr;</span>
                         </a>
                     <?php endif; ?>
                 </div>

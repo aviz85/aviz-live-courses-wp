@@ -226,7 +226,7 @@ body {
     display: inline-block;
     padding: 10px 20px;
     background-color: #3498db;
-    color: #fff;
+    color: #fff !important; /* Force white text color */
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
@@ -234,15 +234,37 @@ body {
 
 .aviz-button:hover {
     background-color: #2980b9;
+    color: #fff !important; /* Force white text color on hover */
 }
 
 .aviz-button.aviz-completed {
     background-color: #27ae60;
 }
 
+.aviz-button.aviz-completed:hover {
+    background-color: #219a52; /* Darker shade for hover */
+}
+
 .aviz-button.aviz-disabled {
     background-color: #95a5a6;
     cursor: not-allowed;
+}
+
+.aviz-button.aviz-disabled:hover {
+    background-color: #7f8c8d; /* Darker shade for hover */
+}
+
+/* Ensure text remains visible on hover for all button states */
+.aviz-button:hover,
+.aviz-button:focus,
+.aviz-button:active,
+.aviz-button.aviz-completed:hover,
+.aviz-button.aviz-completed:focus,
+.aviz-button.aviz-completed:active,
+.aviz-button.aviz-disabled:hover,
+.aviz-button.aviz-disabled:focus,
+.aviz-button.aviz-disabled:active {
+    color: #fff !important;
 }
 
 /* Responsive adjustments */

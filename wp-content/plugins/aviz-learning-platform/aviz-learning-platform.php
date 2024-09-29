@@ -164,3 +164,175 @@ function aviz_secure_upload_directory() {
         file_put_contents($index_file, '<?php // Silence is golden');
     }
 }
+
+function aviz_register_user_form_shortcode($atts) {
+    $atts = shortcode_atts(array(
+        'course_id' => 0,
+    ), $atts);
+
+    $course_id = intval($atts['course_id']);
+
+    if (!$course_id) {
+        return 'מזהה קורס לא תקין';
+    }
+
+    $course = get_post($course_id);
+    if (!$course || $course->post_type !== 'aviz_course') {
+        return 'קורס לא תקין';
+    }
+
+    ob_start();
+
+    if (isset($_POST['aviz_register_step_1'])) {
+        $first_name = sanitize_text_field($_POST['first_name']);
+        $last_name = sanitize_text_field($_POST['last_name']);
+        $email = sanitize_email($_POST['email']);
+        $password = $_POST['password'];
+        $password_confirm = $_POST['password_confirm'];
+        
+        if ($password !== $password_confirm) {
+            echo '<p class="error">הסיסמאות אינן תואמות. אנא נסה שוב.</p>';
+        } elseif (!email_exists($email)) {
+            $verification_code = wp_generate_password(20, false);
+            set_transient('aviz_verification_' . $verification_code, array(
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'email' => $email,
+                'password' => $password,
+                'course_id' => $course_id
+            ), 24 * HOUR_IN_SECONDS);
+
+            $verification_link = add_query_arg(array(
+                'aviz_verify' => $verification_code,
+                'course_id' => $course_id
+            ), get_permalink());
+
+            wp_mail(
+                $email,
+                'אימות כתובת האימייל שלך עבור ' . get_bloginfo('name'),
+                "שלום $first_name,\n\nאנא לחץ על הקישור הבא כדי לאמת את כתובת האימייל שלך ו��השלים את ההרשמה:\n\n" . $verification_link
+            );
+
+            echo '<p class="success">נשלח אימייל אימות. אנא בדוק את תיבת הדואר הנכנס שלך להשלמת ההרשמה.</p>';
+        } else {
+            echo '<p class="error">כתובת האימייל הזו כבר רשומה. אנא השתמש בכתובת אימייל אחרת או התחבר לחשבון הקיים שלך.</p>';
+        }
+    } elseif (isset($_GET['aviz_verify'])) {
+        $verification_code = $_GET['aviz_verify'];
+        $verification_data = get_transient('aviz_verification_' . $verification_code);
+
+        if ($verification_data) {
+            $first_name = $verification_data['first_name'];
+            $last_name = $verification_data['last_name'];
+            $email = $verification_data['email'];
+            $password = $verification_data['password'];
+            $course_id = $verification_data['course_id'];
+
+            $username = sanitize_user(current(explode('@', $email)));
+            $counter = 1;
+            $original_username = $username;
+            while (username_exists($username)) {
+                $username = $original_username . $counter;
+                $counter++;
+            }
+
+            $user_id = wp_create_user($username, $password, $email);
+
+            if (is_wp_error($user_id)) {
+                echo '<p class="error">' . $user_id->get_error_message() . '</p>';
+            } else {
+                wp_update_user(array(
+                    'ID' => $user_id,
+                    'first_name' => $first_name,
+                    'last_name' => $last_name
+                ));
+
+                $user_courses = get_user_meta($user_id, 'aviz_course_access', true);
+                if (!is_array($user_courses)) {
+                    $user_courses = array();
+                }
+                $user_courses[] = $course_id;
+                update_user_meta($user_id, 'aviz_course_access', $user_courses);
+
+                delete_transient('aviz_verification_' . $verification_code);
+
+                $login_url = wp_login_url();
+                wp_mail(
+                    $email,
+                    'החשבון שלך נוצר ב-' . get_bloginfo('name'),
+                    "שלום $first_name,\n\n" .
+                    "החשבון שלך נוצר ונרשמת לקורס: {$course->post_title}\n\n" .
+                    "אתה יכול להתחבר בכתובת: $login_url\n" .
+                    "שם משתמש: $username\n\n" .
+                    "אנא השתמש בסיסמה שהזנת בעת ההרשמה."
+                );
+
+                echo '<p class="success">האימייל אומת וההרשמה הושלמה בהצלחה. אתה יכול כעת להתחבר עם כתובת האימייל והסיסמה שלך.</p>';
+            }
+        } else {
+            echo '<p class="error">קוד אימות לא תקין או שפג תוקפו. אנא נסה להירשם שוב.</p>';
+        }
+    } else {
+        ?>
+        <form method="post" class="aviz-register-user-form">
+            <h2>הרשמה לקורס <?php echo esc_html($course->post_title); ?></h2>
+            <p>
+                <label for="first_name">שם פרטי:</label>
+                <input type="text" name="first_name" id="first_name" required minlength="2" maxlength="50" pattern="[א-ת\s]+" title="אנא הזן שם פרטי בעברית">
+            </p>
+            <p>
+                <label for="last_name">שם משפחה:</label>
+                <input type="text" name="last_name" id="last_name" required minlength="2" maxlength="50" pattern="[א-ת\s]+" title="אנא הזן שם משפחה בעברית">
+            </p>
+            <p>
+                <label for="email">כתובת אימייל:</label>
+                <input type="email" name="email" id="email" required>
+            </p>
+            <p>
+                <label for="password">סיסמה:</label>
+                <input type="password" name="password" id="password" required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="הסיסמה חייבת להכיל לפחות 8 תווים, אות גדולה, אות קטנה ומספר אחד">
+            </p>
+            <p>
+                <label for="password_confirm">אימות סיסמה:</label>
+                <input type="password" name="password_confirm" id="password_confirm" required>
+            </p>
+            <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
+            <p>
+                <input type="submit" name="aviz_register_step_1" value="הרשמה">
+            </p>
+        </form>
+        <script>
+        document.querySelector('.aviz-register-user-form').addEventListener('submit', function(e) {
+            var password = document.getElementById('password');
+            var password_confirm = document.getElementById('password_confirm');
+            if (password.value !== password_confirm.value) {
+                e.preventDefault();
+                alert('הסיסמאות אינן תואמות. אנא נסה שוב.');
+            }
+        });
+        </script>
+        <?php
+    }
+
+    return ob_get_clean();
+}
+add_shortcode('aviz_register_user_form', 'aviz_register_user_form_shortcode');
+
+function aviz_add_post_id_metabox() {
+    $screens = get_post_types([], 'names');
+    foreach ($screens as $screen) {
+        add_meta_box(
+            'aviz_post_id_metabox',
+            'Post ID',
+            'aviz_post_id_metabox_callback',
+            $screen,
+            'side',
+            'high'
+        );
+    }
+}
+add_action('add_meta_boxes', 'aviz_add_post_id_metabox');
+
+function aviz_post_id_metabox_callback($post) {
+    echo '<p>The ID of this post is: <strong>' . $post->ID . '</strong></p>';
+}

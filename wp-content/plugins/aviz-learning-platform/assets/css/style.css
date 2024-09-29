@@ -376,3 +376,128 @@
     align-items: center;
     /* הגדרות נוספות לקישור */
 }
+
+.aviz-register-user-form {
+    direction: rtl;
+    text-align: right;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.aviz-register-user-form h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.aviz-register-user-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+}
+
+.aviz-register-user-form input[type="text"],
+.aviz-register-user-form input[type="email"],
+.aviz-register-user-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.aviz-register-user-form input[type="text"]:focus,
+.aviz-register-user-form input[type="email"]:focus,
+.aviz-register-user-form input[type="password"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+.aviz-register-user-form input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.aviz-register-user-form input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.success {
+    color: #4CAF50;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.error {
+    color: #f44336;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .aviz-register-user-form {
+        width: 90%;
+        padding: 15px;
+    }
+}
+
+.aviz-register-container {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.aviz-register-user-form .form-group {
+    margin-bottom: 20px;
+}
+
+.aviz-register-user-form input[type="text"],
+.aviz-register-user-form input[type="email"],
+.aviz-register-user-form input[type="password"] {
+    transition: all 0.3s ease;
+}
+
+.aviz-register-user-form input[type="text"]:focus,
+.aviz-register-user-form input[type="email"]:focus,
+.aviz-register-user-form input[type="password"]:focus {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.aviz-register-user-form input[type="submit"] {
+    transition: all 0.3s ease;
+}
+
+.aviz-register-user-form input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.aviz-register-user-form input[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: none;
+}

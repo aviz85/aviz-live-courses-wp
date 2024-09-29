@@ -294,3 +294,45 @@ body {
         margin-bottom: 10px;
     }
 }
+
+.aviz-register-user-form {
+    direction: rtl;
+    text-align: right;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.aviz-register-user-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.aviz-register-user-form input[type="text"],
+.aviz-register-user-form input[type="email"],
+.aviz-register-user-form input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.aviz-register-user-form input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+}
+
+.aviz-register-user-form input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
